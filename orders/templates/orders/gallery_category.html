@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>{{ category.name }} — Shots By Beysos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:        #0d0d0d;
+  --cream:      #f5f0e8;
+  --gold:       #c9a84c;
+  --gold-light: #e8d5a0;
+  --muted:      #8a8070;
+  --border:     rgba(201,168,76,0.22);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+
+.grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.045; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* PROMO BAR */
+.nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: var(--ink); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
+
+/* NAVBAR */
+.nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; transition: background 0.4s, padding 0.4s; }
+.nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
+.nav-logo img { height: 42px; }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+.nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--gold); }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+.nav-cta { background: var(--gold) !important; color: var(--ink) !important; padding: 9px 22px; border-radius: 2px; font-weight: 500 !important; }
+.nav-cta:hover { background: var(--gold-light) !important; }
+.nav-cta::after { display: none !important; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.hamburger span { width: 24px; height: 1px; background: var(--cream); display: block; }
+@media (max-width: 768px) {
+  .nav { padding: 14px 24px; }
+  .nav.scrolled { padding: 10px 24px; }
+  .hamburger { display: flex; }
+  .nav-links { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: 14px; }
+}
+
+/* PAGE HERO */
+.page-hero { padding: 160px 0 80px; text-align: center; position: relative; z-index: 1; border-bottom: 1px solid var(--border); }
+.page-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%); pointer-events: none; }
+.breadcrumb { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+.breadcrumb a { color: var(--gold); text-decoration: none; }
+.breadcrumb a:hover { text-decoration: underline; }
+.eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 300; line-height: 1.05; color: var(--cream); }
+.page-hero h1 em { font-style: italic; color: var(--gold-light); }
+.page-hero p { margin-top: 18px; font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 480px; margin-left: auto; margin-right: auto; }
+.divider-line { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 24px auto 0; max-width: 200px; }
+.divider-line span { flex: 1; height: 1px; background: var(--border); }
+.divider-line .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+
+/* CATEGORY NAV */
+.cat-nav { position: relative; z-index: 1; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; }
+.cat-nav::-webkit-scrollbar { display: none; }
+.cat-nav a { flex-shrink: 0; padding: 18px 20px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.3s; white-space: nowrap; }
+.cat-nav a:hover { color: var(--cream); }
+.cat-nav a.active { color: var(--gold); border-bottom-color: var(--gold); }
+@media (max-width: 600px) { .cat-nav { padding: 0 20px; } }
+
+/* MAIN */
+.main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 60px 40px 100px; }
+@media (max-width: 600px) { .main { padding: 40px 20px 80px; } }
+
+/* MASONRY */
+.masonry { columns: 3; column-gap: 14px; }
+@media (max-width: 900px) { .masonry { columns: 2; } }
+@media (max-width: 500px)  { .masonry { columns: 1; } }
+
+.masonry-item { break-inside: avoid; margin-bottom: 14px; position: relative; overflow: hidden; border-radius: 2px; cursor: pointer; border: 1px solid var(--border); }
+.masonry-item img { display: block; width: 100%; height: auto; transition: transform 0.5s ease; }
+.masonry-item:hover img { transform: scale(1.04); }
+.masonry-item .img-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,13,13,0.75) 0%, transparent 50%); opacity: 0; transition: opacity 0.3s; display: flex; align-items: flex-end; padding: 16px; }
+.masonry-item:hover .img-overlay { opacity: 1; }
+.img-overlay span { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--gold-light); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: 2px; }
+.empty-state p { font-size: 14px; color: var(--muted); margin-top: 12px; }
+
+/* LIGHTBOX */
+.lightbox { position: fixed; inset: 0; z-index: 200; background: rgba(13,13,13,0.96); display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(8px); }
+.lightbox.open { display: flex; }
+.lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; }
+.lightbox-inner img { display: block; max-width: 90vw; max-height: 85vh; object-fit: contain; border: 1px solid var(--border); border-radius: 2px; }
+.lightbox-close { position: absolute; top: -40px; right: 0; background: none; border: none; color: var(--muted); font-size: 28px; cursor: pointer; line-height: 1; transition: color 0.2s; }
+.lightbox-close:hover { color: var(--cream); }
+.lightbox-caption { margin-top: 12px; text-align: center; font-size: 12px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; }
+.lightbox-nav { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(13,13,13,0.7); border: 1px solid var(--border); color: var(--cream); font-size: 20px; width: 44px; height: 44px; border-radius: 2px; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; }
+.lightbox-nav:hover { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.lightbox-prev { left: -60px; }
+.lightbox-next { right: -60px; }
+@media (max-width: 700px) { .lightbox-prev { left: 0; top: auto; bottom: -56px; transform: none; } .lightbox-next { right: 0; top: auto; bottom: -56px; transform: none; } }
+
+/* CTA BANNER */
+.cta-banner { margin-top: 60px; padding: 56px 48px; background: rgba(201,168,76,0.06); border: 1px solid var(--border); border-radius: 2px; text-align: center; }
+.cta-banner h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: var(--cream); margin-bottom: 12px; }
+.cta-banner h3 em { font-style: italic; color: var(--gold-light); }
+.cta-banner p { font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 460px; margin: 0 auto 32px; }
+.btn-gold { background: var(--gold); color: var(--ink); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
+.footer-copy { font-size: 12px; color: var(--muted); }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+.footer-links a:hover { color: var(--gold); }
+@media (max-width: 600px) { footer { padding: 32px 24px; flex-direction: column; text-align: center; } .footer-links { justify-content: center; } }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- PROMO BAR -->
+<div class="nav-promo">✦ Exclusive 20% off this week — use code BEYSOS20 ✦</div>
+
+<!-- NAVBAR -->
+<nav class="nav" id="navbar">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop,q=95/Vk75LpTKjSjaGtev/untitled-design-2-bqV3e3351SqyseYc.png" alt="Shots By Beysos"/>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'gallery' %}" class="active">Gallery</a></li>
+    <li><a href="{% url 'home' %}#about">About</a></li>
+    <li><a href="{% url 'home' %}#contact">Contact</a></li>
+    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="breadcrumb"><a href="{% url 'gallery' %}">Gallery</a> &nbsp;/&nbsp; {{ category.name }}</div>
+  <div class="eyebrow">Category</div>
+  <h1><em>{{ category.name }}</em></h1>
+  {% if category.description %}<p>{{ category.description }}</p>{% endif %}
+  <div class="divider-line"><span></span><div class="diamond"></div><span></span></div>
+</div>
+
+<!-- CATEGORY NAV TABS -->
+<div class="cat-nav">
+  {% for cat in categories %}
+  <a href="{% url 'gallery_category' cat.slug %}" {% if cat.slug == category.slug %}class="active"{% endif %}>{{ cat.name }}</a>
+  {% endfor %}
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  {% if images %}
+  <div class="masonry reveal" id="masonryGrid">
+    {% for img in images %}
+    <div class="masonry-item" onclick="openLightbox({{ forloop.counter0 }})">
+      <img src="{{ img.image.url }}" alt="{{ img.title|default:category.name }}" loading="lazy"/>
+      <div class="img-overlay">
+        <span>{{ img.title|default:"View" }}</span>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="empty-state">
+    <p style="font-size:32px;">📷</p>
+    <p>No images uploaded yet for this category.<br/>Check back soon or explore another category.</p>
+  </div>
+  {% endif %}
+
+  <!-- CTA BANNER -->
+  <div class="cta-banner reveal">
+    <h3>Love What You See? <em>Book Yours.</em></h3>
+    <p>Get your own AI-enhanced photos in the <strong style="color:var(--cream)">{{ category.name }}</strong> style and more.</p>
+    <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© Lifestro Global 2025. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'gallery' %}">Gallery</a>
+    <a href="{% url 'order_form' %}">Book Now</a>
+    <a href="{% url 'home' %}#contact">Contact</a>
+  </div>
+</footer>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox">
+  <div class="lightbox-inner">
+    <button class="lightbox-close" onclick="closeLightbox()">×</button>
+    <button class="lightbox-nav lightbox-prev" onclick="shiftLightbox(-1)">‹</button>
+    <button class="lightbox-nav lightbox-next" onclick="shiftLightbox(1)">›</button>
+    <img src="" alt="" id="lightboxImg"/>
+    <div class="lightbox-caption" id="lightboxCaption"></div>
+  </div>
+</div>
+
+<script>
+// Navbar
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => navbar.classList.toggle('scrolled', window.scrollY > 60));
+document.getElementById('hamburger').addEventListener('click', () => document.getElementById('navLinks').classList.toggle('open'));
+document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open')));
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Lightbox data from Django
+const images = [
+  {% for img in images %}
+  { src: '{{ img.image.url }}', caption: '{{ img.title|default:category.name|escapejs }}' },
+  {% endfor %}
+];
+
+let currentIndex = 0;
+
+function openLightbox(index) {
+  currentIndex = index;
+  renderLightbox();
+  document.getElementById('lightbox').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+  document.getElementById('lightbox').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function shiftLightbox(dir) {
+  currentIndex = (currentIndex + dir + images.length) % images.length;
+  renderLightbox();
+}
+
+function renderLightbox() {
+  const item = images[currentIndex];
+  document.getElementById('lightboxImg').src = item.src;
+  document.getElementById('lightboxImg').alt = item.caption;
+  document.getElementById('lightboxCaption').textContent = item.caption;
+}
+
+document.getElementById('lightbox').addEventListener('click', function(e) {
+  if (e.target === this) closeLightbox();
+});
+
+document.addEventListener('keydown', e => {
+  if (!document.getElementById('lightbox').classList.contains('open')) return;
+  if (e.key === 'Escape')     closeLightbox();
+  if (e.key === 'ArrowRight') shiftLightbox(1);
+  if (e.key === 'ArrowLeft')  shiftLightbox(-1);
+});
+</script>
+</body>
+</html>

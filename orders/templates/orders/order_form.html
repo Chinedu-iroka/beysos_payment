@@ -1,0 +1,896 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Photo Studio — Place Your Order</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root {
+    --ink: #0d0d0d;
+    --cream: #f5f0e8;
+    --gold: #c9a84c;
+    --gold-light: #e8d5a0;
+    --warm-white: #faf8f4;
+    --muted: #8a8070;
+    --border: rgba(201,168,76,0.25);
+    --step-active: #c9a84c;
+    --step-done: #8a7040;
+    --error: #c0392b;
+    --success: #2d6a4f;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background-color: var(--ink);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,168,76,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 90%, rgba(201,168,76,0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grain {
+    position: fixed;
+    inset: 0;
+    opacity: 0.04;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 140px 24px 100px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 56px;
+    animation: fadeUp 0.8s ease both;
+  }
+
+  .header .eyebrow {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 11px;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 16px;
+  }
+
+  .header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 6vw, 3.6rem);
+    font-weight: 300;
+    line-height: 1.1;
+    color: var(--cream);
+  }
+
+  .header h1 em {
+    font-style: italic;
+    color: var(--gold-light);
+  }
+
+  .header p {
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--muted);
+    letter-spacing: 0.02em;
+    line-height: 1.7;
+  }
+
+  .divider {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin: 28px auto 0;
+    max-width: 200px;
+  }
+
+  .divider span { flex: 1; height: 1px; background: var(--border); }
+
+  .divider .diamond {
+    width: 6px;
+    height: 6px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    flex-shrink: 0;
+  }
+
+  .steps {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 48px;
+    animation: fadeUp 0.8s 0.1s ease both;
+  }
+
+  .step-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .step-circle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    color: var(--muted);
+    transition: all 0.4s ease;
+    position: relative;
+  }
+
+  .step-circle.active { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 16px rgba(201,168,76,0.25); }
+  .step-circle.done   { background: var(--step-done); border-color: var(--step-done); color: var(--cream); }
+  .step-circle.done::after { content: '✓'; font-size: 14px; }
+
+  .step-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+  .step-label.active { color: var(--gold); }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    margin: 0 12px;
+    margin-bottom: 24px;
+    max-width: 80px;
+    transition: background 0.4s;
+  }
+  .step-line.done { background: var(--step-done); }
+
+  .card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 40px 40px;
+    backdrop-filter: blur(8px);
+    animation: fadeUp 0.8s 0.2s ease both;
+  }
+
+  @media (max-width: 520px) { .card { padding: 28px 20px; } }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeUp 0.5s ease both; }
+
+  .panel-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.7rem;
+    font-weight: 400;
+    color: var(--cream);
+    margin-bottom: 6px;
+  }
+
+  .panel-subtitle { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.6; }
+
+  .selected-style {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: rgba(201,168,76,0.08);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    margin-bottom: 28px;
+  }
+
+  .style-badge {
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    background: rgba(201,168,76,0.12);
+    padding: 4px 10px;
+    border-radius: 2px;
+    white-space: nowrap;
+  }
+
+  .style-name { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--cream); }
+
+  .change-style {
+    margin-left: auto;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    color: var(--gold);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    background: none;
+    border: none;
+    white-space: nowrap;
+  }
+
+  .field { margin-bottom: 22px; }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  .field input[type="text"],
+  .field input[type="email"] {
+    width: 100%;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 13px 16px;
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    outline: none;
+  }
+
+  .field input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+  .field input::placeholder { color: rgba(138,128,112,0.6); }
+  .field .hint { font-size: 12px; color: var(--muted); margin-top: 6px; line-height: 1.5; }
+
+  .upload-zone {
+    border: 1px dashed rgba(201,168,76,0.4);
+    border-radius: 2px;
+    padding: 36px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: rgba(201,168,76,0.03);
+    position: relative;
+  }
+
+  .upload-zone:hover,
+  .upload-zone.drag-over { border-color: var(--gold); background: rgba(201,168,76,0.07); box-shadow: 0 0 20px rgba(201,168,76,0.1); }
+
+  .upload-zone input[type="file"] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+
+  .upload-icon { font-size: 28px; margin-bottom: 12px; opacity: 0.6; }
+  .upload-zone .upload-text { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--cream); margin-bottom: 6px; }
+  .upload-zone .upload-sub { font-size: 12px; color: var(--muted); }
+
+  .file-preview { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 16px; }
+
+  .file-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(201,168,76,0.1);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: var(--cream);
+  }
+
+  .file-chip .remove { cursor: pointer; font-size: 16px; line-height: 1; background: none; border: none; color: var(--muted); transition: color 0.2s; padding: 0; }
+  .file-chip .remove:hover { color: var(--error); }
+
+  .summary-box { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 2px; padding: 20px 22px; margin-bottom: 28px; }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 13px;
+    padding: 7px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: var(--muted);
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+  .summary-row span:last-child { color: var(--cream); }
+
+  .summary-row.total { padding-top: 14px; margin-top: 6px; border-top: 1px solid var(--border); border-bottom: none; font-size: 15px; }
+  .summary-row.total span:first-child { font-family: 'Cormorant Garamond', serif; font-size: 1.1rem; color: var(--cream); font-weight: 400; }
+  .summary-row.total span:last-child  { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; color: var(--gold); font-weight: 600; }
+
+  .stripe-field {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .stripe-field.focused { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px 28px;
+    border-radius: 2px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .btn-primary { background: var(--gold); color: var(--ink); }
+  .btn-primary:hover { background: var(--gold-light); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(201,168,76,0.25); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px solid var(--border); margin-top: 12px; }
+  .btn-ghost:hover { color: var(--cream); border-color: rgba(201,168,76,0.5); }
+
+  .spinner { width: 16px; height: 16px; border: 2px solid rgba(13,13,13,0.3); border-top-color: var(--ink); border-radius: 50%; animation: spin 0.7s linear infinite; display: none; }
+
+  .btn-primary.loading .spinner { display: block; }
+  .btn-primary.loading .btn-label { display: none; }
+
+  .msg { padding: 12px 16px; border-radius: 2px; font-size: 13px; margin-top: 16px; display: none; line-height: 1.5; }
+  .msg.error { background: rgba(192,57,43,0.12); border: 1px solid rgba(192,57,43,0.3); color: #e87c6e; }
+  .msg.info  { background: rgba(201,168,76,0.08); border: 1px solid var(--border); color: var(--gold-light); }
+
+  .success-screen { text-align: center; padding: 20px 0; }
+
+  .success-icon {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: rgba(45,106,79,0.15);
+    border: 1px solid rgba(45,106,79,0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 24px;
+    animation: popIn 0.5s ease both;
+  }
+
+  .success-screen h2 { font-family: 'Cormorant Garamond', serif; font-size: 2rem; font-weight: 300; color: var(--cream); margin-bottom: 12px; }
+  .success-screen p  { font-size: 14px; color: var(--muted); line-height: 1.7; max-width: 400px; margin: 0 auto 8px; }
+
+  .success-screen .order-id {
+    display: inline-block;
+    margin-top: 16px;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 2px;
+  }
+
+  .secure-badge { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 20px; font-size: 11px; color: var(--muted); letter-spacing: 0.08em; }
+  .secure-badge svg { opacity: 0.5; }
+
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes spin   { to { transform: rotate(360deg); } }
+  @keyframes popIn  { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.1); } 100% { transform: scale(1); opacity: 1; } }
+
+  .style-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; margin-bottom: 28px; }
+
+  .style-thumb { width: 100%; height: 100px; object-fit: cover; border-radius: 2px; margin-bottom: 8px; display: block; }
+
+  .style-card {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px 12px;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.3s;
+    background: rgba(255,255,255,0.02);
+  }
+
+
+  /* NAVBAR */
+.nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; transition: background 0.4s, padding 0.4s; }
+.nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
+.nav-logo img { height: 42px; }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+.nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { transform: scaleX(1); }
+.nav-cta { background: var(--gold) !important; color: var(--ink) !important; padding: 9px 22px; border-radius: 2px; font-weight: 500 !important; }
+.nav-cta:hover { background: var(--gold-light) !important; }
+.nav-cta::after { display: none !important; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.hamburger span { width: 24px; height: 1px; background: var(--cream); display: block; }
+@media (max-width: 768px) {
+  .nav { padding: 14px 24px; }
+  .nav.scrolled { padding: 10px 24px; }
+  .hamburger { display: flex; }
+  .nav-links { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: 14px; }
+}
+
+  .style-card:hover { border-color: rgba(201,168,76,0.5); background: rgba(201,168,76,0.05); }
+  .style-card.selected { border-color: var(--gold); background: rgba(201,168,76,0.1); box-shadow: 0 0 16px rgba(201,168,76,0.15); }
+  .style-card .style-card-name { font-size: 12px; letter-spacing: 0.05em; color: var(--cream); }
+  .style-card.selected .style-card-name { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- PROMO BAR -->
+<div class="nav-promo">✦ Exclusive 20% off this week — use code BEYSOS20 ✦</div>
+
+<!-- NAVBAR -->
+<nav class="nav" id="navbar">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop,q=95/Vk75LpTKjSjaGtev/untitled-design-2-bqV3e3351SqyseYc.png" alt="Shots By Beysos"/>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#how">How It Works</a></li>
+    <li><a href="{% url 'gallery' %}">Gallery</a></li>
+    <li><a href="#contact">Contact</a></li>
+    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="eyebrow">Shots By Beysos</div>
+    <h1>Transform Your Photo<br/><em>Into Studio Art</em></h1>
+    <p>Select your style, upload your photo, and receive<br/>your transformed image within 24 hours.</p>
+    <div class="divider"><span></span><div class="diamond"></div><span></span></div>
+  </div>
+
+  <!-- Steps -->
+  <div class="steps" id="stepsBar">
+    <div class="step-item">
+      <div class="step-circle active" id="sc1">1</div>
+      <div class="step-label active" id="sl1">Details</div>
+    </div>
+    <div class="step-line" id="line1"></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc2">2</div>
+      <div class="step-label" id="sl2">Upload</div>
+    </div>
+    <div class="step-line" id="line2"></div>
+    <div class="step-item">
+      <div class="step-circle" id="sc3">3</div>
+      <div class="step-label" id="sl3">Payment</div>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- PANEL 1: Details -->
+    <div class="panel active" id="panel1">
+      <div class="panel-title">Your Details</div>
+      <div class="panel-subtitle">Tell us who you are and which style you'd like.</div>
+
+      <div class="field">
+        <label>Choose Your Style</label>
+        <div class="style-grid" id="styleGrid">
+          <div class="style-card selected" data-style="Professional headshots">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119618-YlJqLOwd9d5691tn.png" alt="Professional headshots" class="style-thumb"/>
+            <div class="style-card-name">Professional headshots</div>
+          </div>
+          <div class="style-card" data-style="Fashion and lifestyle">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119651-GuCdHmTb55Dd26Jg.png" alt="Fashion and lifestyle" class="style-thumb"/>
+            <div class="style-card-name">Fashion and lifestyle</div>
+          </div>
+          <div class="style-card" data-style="Creative and artistic">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/chatgpt-image-feb-27-2026-03_28_04-pm-a89QMLOinCz57JnP.png" alt="Creative and artistic" class="style-thumb"/>
+            <div class="style-card-name">Creative and artistic</div>
+          </div>
+          <div class="style-card" data-style="Brand and corporate">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000107891-1---edited-GBSqPZsbdY8bq237.png" alt="Brand and corporate" class="style-thumb"/>
+            <div class="style-card-name">Brand and corporate</div>
+          </div>
+          <div class="style-card" data-style="Social media content">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/chatgpt-image-feb-27-2026-05_21_45-pm-JbXrdo8Tg1XBLfP2.png" alt="Social media content" class="style-thumb"/>
+            <div class="style-card-name">Social media content</div>
+          </div>
+          <div class="style-card" data-style="Special occasions">
+            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119658-buf81N5DNfPw2jIX.png" alt="Special occasions" class="style-thumb"/>
+            <div class="style-card-name">Special occasions</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="clientName" placeholder="e.g. Amara Johnson" autocomplete="name"/>
+      </div>
+
+      <div class="field">
+        <label>Email Address</label>
+        <input type="email" id="clientEmail" placeholder="you@example.com" autocomplete="email"/>
+        <div class="hint">Your transformed photo and receipt will be sent here.</div>
+      </div>
+
+      <div class="field">
+        <label>Booking ID</label>
+        <input type="text" id="clientID" placeholder="e.g. SBS001"/>
+      </div>
+
+      <div class="msg error" id="msg1"></div>
+
+      <button class="btn btn-primary" onclick="goToStep2()">
+        <span class="btn-label">Continue to Upload →</span>
+        <div class="spinner"></div>
+      </button>
+    </div>
+
+    <!-- PANEL 2: Upload -->
+    <div class="panel" id="panel2">
+      <div class="panel-title">Upload Your Photo</div>
+      <div class="panel-subtitle">Upload the original photo(s) you'd like transformed. Clear, well-lit photos give the best results.</div>
+
+      <div class="selected-style" id="selectedStyleBanner">
+        <div class="style-badge">Style</div>
+        <div class="style-name" id="selectedStyleName">Professional headshots</div>
+        <button class="change-style" onclick="goToStep1()">Change</button>
+      </div>
+
+      <div class="field">
+        <label>Upload Photo(s)</label>
+        <div class="upload-zone" id="uploadZone">
+          <input type="file" id="photoUpload" accept="image/jpeg,image/png,image/webp" multiple/>
+          <div class="upload-icon">📷</div>
+          <div class="upload-text">Drop your photos here</div>
+          <div class="upload-sub">or click to browse — JPG, PNG, WEBP · Max 10MB each</div>
+        </div>
+        <div class="file-preview" id="filePreview"></div>
+      </div>
+
+      <div class="field">
+        <label>Special Instructions <span style="color:var(--muted);font-size:10px;letter-spacing:0">(optional)</span></label>
+        <input type="text" id="specialNotes" placeholder="e.g. Keep my natural hair colour"/>
+      </div>
+
+      <div class="msg error" id="msg2"></div>
+
+      <button class="btn btn-primary" onclick="goToStep3()">
+        <span class="btn-label">Continue to Payment →</span>
+        <div class="spinner"></div>
+      </button>
+      <button class="btn btn-ghost" onclick="goToStep1()">← Back</button>
+    </div>
+
+    <!-- PANEL 3: Payment -->
+    <div class="panel" id="panel3">
+      <div class="panel-title">Secure Payment</div>
+      <div class="panel-subtitle">Review your order and complete payment. Your order is only confirmed once payment succeeds.</div>
+
+      <div class="summary-box">
+        <div class="summary-row"><span>Client</span><span id="sumName">—</span></div>
+        <div class="summary-row"><span>Email</span><span id="sumEmail">—</span></div>
+        <div class="summary-row"><span>Style</span><span id="sumStyle">—</span></div>
+        <div class="summary-row"><span>Photos</span><span id="sumPhotos">—</span></div>
+        <div class="summary-row total"><span>Total</span><span id="sumTotal">$25.00</span></div>
+      </div>
+
+      <div class="field">
+        <label>Card Details</label>
+        <div class="stripe-field" id="cardElement"></div>
+      </div>
+
+      <div class="msg error" id="cardErrors"></div>
+      <div class="msg info"  id="cardInfo"></div>
+
+      <button class="btn btn-primary" id="payBtn" onclick="handlePayment()">
+        <span class="btn-label">🔒 Pay & Place Order</span>
+        <div class="spinner"></div>
+      </button>
+      <button class="btn btn-ghost" onclick="goToStep2()">← Back</button>
+
+      <div class="secure-badge">
+        <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
+          <path d="M6 0L0 2.5V7C0 10.3 2.6 13.4 6 14C9.4 13.4 12 10.3 12 7V2.5L6 0Z" fill="currentColor"/>
+        </svg>
+        Secured by Stripe · 256-bit SSL encryption
+      </div>
+    </div>
+
+    <!-- PANEL 4: Success -->
+    <div class="panel" id="panel4">
+      <div class="success-screen">
+        <div class="success-icon">✓</div>
+        <h2>Order Confirmed!</h2>
+        <p>Payment successful. Your order has been received and our team will begin transforming your photo shortly.</p>
+        <p>A confirmation has been sent to <strong id="confEmail" style="color:var(--cream)"></strong></p>
+        <p style="margin-top:10px">Expect your AI-enhanced photo within <strong style="color:var(--cream)">24 - 48 hours.</strong></p>
+        <div class="order-id" id="orderId"></div>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /container -->
+
+<script>
+
+
+
+  // Navbar scroll
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Mobile menu
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+
+// ─────────────────────────────────────────────
+// Django injects these values from settings.py
+// ─────────────────────────────────────────────
+const CONFIG = {
+  stripePublishableKey: '{{ stripe_publishable_key }}',
+  pricePerPhoto:        {{ price_per_photo }},
+  currency:             '{{ currency }}',
+  currencySymbol:       '$',
+  csrfToken:            '{{ csrf_token }}',
+  createPaymentIntentUrl: '{% url "create_payment_intent" %}',
+  saveOrderUrl:           '{% url "save_order" %}',
+};
+
+// State
+let selectedStyle = 'Professional headshots';
+let uploadedFiles = [];
+let stripe, cardElement;
+
+// Init Stripe
+function initStripe() {
+  if (CONFIG.stripePublishableKey.includes('REPLACE')) {
+    document.getElementById('cardInfo').style.display = 'block';
+    document.getElementById('cardInfo').textContent =
+      '⚠️ Demo mode: Add your Stripe keys to settings.py (or .env) to activate real payments.';
+    return;
+  }
+  stripe = Stripe(CONFIG.stripePublishableKey);
+  const elements = stripe.elements({
+    fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap' }]
+  });
+  cardElement = elements.create('card', {
+    style: {
+      base: {
+        fontFamily: "'DM Sans', sans-serif",
+        fontSize: '14px',
+        color: '#f5f0e8',
+        '::placeholder': { color: 'rgba(138,128,112,0.6)' },
+        iconColor: '#c9a84c',
+      },
+      invalid: { color: '#e87c6e' }
+    }
+  });
+  cardElement.mount('#cardElement');
+  cardElement.on('focus', () => document.getElementById('cardElement').parentElement.classList.add('focused'));
+  cardElement.on('blur',  () => document.getElementById('cardElement').parentElement.classList.remove('focused'));
+}
+
+// Style selection
+document.getElementById('styleGrid').addEventListener('click', e => {
+  const card = e.target.closest('.style-card');
+  if (!card) return;
+  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
+  card.classList.add('selected');
+  selectedStyle = card.dataset.style;
+});
+
+// File upload
+const photoInput = document.getElementById('photoUpload');
+const uploadZone = document.getElementById('uploadZone');
+
+photoInput.addEventListener('change', () => handleFiles(photoInput.files));
+uploadZone.addEventListener('dragover',  e => { e.preventDefault(); uploadZone.classList.add('drag-over'); });
+uploadZone.addEventListener('dragleave', ()  => uploadZone.classList.remove('drag-over'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault();
+  uploadZone.classList.remove('drag-over');
+  handleFiles(e.dataTransfer.files);
+});
+
+function handleFiles(files) {
+  Array.from(files).forEach(file => {
+    if (!file.type.startsWith('image/')) return;
+    if (file.size > 10 * 1024 * 1024) { showMsg('msg2', `${file.name} exceeds 10MB.`); return; }
+    if (uploadedFiles.find(f => f.name === file.name)) return;
+    uploadedFiles.push(file);
+  });
+  renderFilePreviews();
+  updatePricing();
+}
+
+function removeFile(name) {
+  uploadedFiles = uploadedFiles.filter(f => f.name !== name);
+  renderFilePreviews();
+  updatePricing();
+}
+
+function renderFilePreviews() {
+  const container = document.getElementById('filePreview');
+  container.innerHTML = '';
+  uploadedFiles.forEach(f => {
+    const chip = document.createElement('div');
+    chip.className = 'file-chip';
+    chip.innerHTML = `📸 ${f.name} <button class="remove" onclick="removeFile('${f.name}')">×</button>`;
+    container.appendChild(chip);
+  });
+}
+
+function updatePricing() {
+  const count = uploadedFiles.length || 1;
+  const total = ((CONFIG.pricePerPhoto * count) / 100).toFixed(2);
+  document.getElementById('sumTotal').textContent  = `${CONFIG.currencySymbol}${total}`;
+  document.getElementById('sumPhotos').textContent = `${uploadedFiles.length} photo${uploadedFiles.length !== 1 ? 's' : ''}`;
+}
+
+// Navigation
+function setStep(n) {
+  [1,2,3,4].forEach(i => {
+    document.getElementById(`panel${i}`).classList.toggle('active', i === n);
+    const sc = document.getElementById(`sc${i}`);
+    const sl = document.getElementById(`sl${i}`);
+    if (!sc) return;
+    sc.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
+    sc.textContent = i < n ? '' : i;
+    sl.className = 'step-label' + (i === n ? ' active' : '');
+    const line = document.getElementById(`line${i}`);
+    if (line) line.className = 'step-line' + (i < n ? ' done' : '');
+  });
+  if (n === 3) initStripe();
+}
+
+function showMsg(id, text) { const el = document.getElementById(id); el.textContent = text; el.style.display = 'block'; }
+function clearMsg(id)      { document.getElementById(id).style.display = 'none'; }
+
+function goToStep1() { setStep(1); }
+
+function goToStep2() {
+  clearMsg('msg1');
+  const name    = document.getElementById('clientName').value.trim();
+  const email   = document.getElementById('clientEmail').value.trim();
+  const booking = document.getElementById('clientID').value.trim();
+  if (!name)    return showMsg('msg1', 'Please enter your full name.');
+  if (!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('msg1', 'Please enter a valid email address.');
+  if (!booking) return showMsg('msg1', 'Please enter your Booking ID.');
+  document.getElementById('selectedStyleName').textContent = selectedStyle;
+  setStep(2);
+}
+
+function goToStep3() {
+  clearMsg('msg2');
+  if (uploadedFiles.length === 0) return showMsg('msg2', 'Please upload at least one photo to continue.');
+  document.getElementById('sumName').textContent  = document.getElementById('clientName').value.trim();
+  document.getElementById('sumEmail').textContent = document.getElementById('clientEmail').value.trim();
+  document.getElementById('sumStyle').textContent = selectedStyle;
+  updatePricing();
+  setStep(3);
+}
+
+// ─────────────────────────────────────────────
+// PAYMENT FLOW
+// 1. Ask Django backend to create a Stripe PaymentIntent
+// 2. Confirm card payment with Stripe.js
+// 3. On success, POST order + photos to Django backend
+// ─────────────────────────────────────────────
+async function handlePayment() {
+  const btn = document.getElementById('payBtn');
+  clearMsg('cardErrors');
+
+  // Demo mode
+  if (CONFIG.stripePublishableKey.includes('REPLACE')) {
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(() => {
+      btn.classList.remove('loading'); btn.disabled = false;
+      showSuccessScreen('DEMO-' + Math.random().toString(36).substr(2,8).toUpperCase());
+    }, 1800);
+    return;
+  }
+
+  btn.classList.add('loading'); btn.disabled = true;
+
+  try {
+    // Step 1: Create PaymentIntent via Django backend
+    const intentRes = await fetch(CONFIG.createPaymentIntentUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken':  CONFIG.csrfToken,
+      },
+      body: JSON.stringify({
+        photo_count:   uploadedFiles.length || 1,
+        client_name:   document.getElementById('clientName').value.trim(),
+        client_email:  document.getElementById('clientEmail').value.trim(),
+        booking_id:    document.getElementById('clientID').value.trim(),
+        style_chosen:  selectedStyle,
+        special_notes: document.getElementById('specialNotes').value.trim(),
+      }),
+    });
+
+    const intentData = await intentRes.json();
+    if (!intentRes.ok || intentData.error) throw new Error(intentData.error || 'Could not initiate payment.');
+
+    // Step 2: Confirm card payment with Stripe.js
+    const { paymentIntent, error } = await stripe.confirmCardPayment(intentData.clientSecret, {
+      payment_method: {
+        card: cardElement,
+        billing_details: {
+          name:  document.getElementById('clientName').value.trim(),
+          email: document.getElementById('clientEmail').value.trim(),
+        }
+      }
+    });
+
+    if (error) { showMsg('cardErrors', error.message); btn.classList.remove('loading'); btn.disabled = false; return; }
+
+    if (paymentIntent.status === 'succeeded') {
+      // Step 3: Save order + upload photos to Django
+      const formData = new FormData();
+      formData.append('client_name',       document.getElementById('clientName').value.trim());
+      formData.append('client_email',      document.getElementById('clientEmail').value.trim());
+      formData.append('booking_id',        document.getElementById('clientID').value.trim());
+      formData.append('style_chosen',      selectedStyle);
+      formData.append('special_notes',     document.getElementById('specialNotes').value.trim());
+      formData.append('stripe_payment_id', paymentIntent.id);
+      uploadedFiles.forEach(f => formData.append('photos', f));
+
+      const saveRes  = await fetch(CONFIG.saveOrderUrl, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CONFIG.csrfToken },
+        body: formData,
+      });
+      const saveData = await saveRes.json();
+      if (!saveRes.ok || saveData.error) throw new Error(saveData.error || 'Order saved but could not confirm. Please contact support.');
+
+      showSuccessScreen(saveData.orderId);
+    }
+
+  } catch (err) {
+    showMsg('cardErrors', err.message || 'Payment failed. Please try again.');
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+}
+
+function showSuccessScreen(orderId) {
+  document.getElementById('confEmail').textContent = document.getElementById('clientEmail').value.trim();
+  document.getElementById('orderId').textContent   = 'Order ID: ' + orderId;
+  setStep(4);
+  document.getElementById('stepsBar').style.display = 'none';
+}
+</script>
+</body>
+</html>

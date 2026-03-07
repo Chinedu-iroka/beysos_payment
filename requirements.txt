@@ -1,0 +1,4 @@
+Django>=4.2,<5.0
+stripe>=7.0
+Pillow>=10.0       # required for ImageField
+python-dotenv>=1.0 # optional: load .env file in development

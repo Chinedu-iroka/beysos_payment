@@ -1,0 +1,311 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gallery — Shots By Beysos</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --ink:        #0d0d0d;
+  --cream:      #f5f0e8;
+  --gold:       #c9a84c;
+  --gold-light: #e8d5a0;
+  --muted:      #8a8070;
+  --border:     rgba(201,168,76,0.22);
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+
+.grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.045; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* PROMO BAR */
+.nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: var(--ink); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
+
+/* NAVBAR */
+.nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; transition: background 0.4s, padding 0.4s; }
+.nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
+.nav-logo img { height: 42px; }
+.nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+.nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
+.nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+.nav-links a:hover, .nav-links a.active { color: var(--gold); }
+.nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
+.nav-cta { background: var(--gold) !important; color: var(--ink) !important; padding: 9px 22px; border-radius: 2px; font-weight: 500 !important; }
+.nav-cta:hover { background: var(--gold-light) !important; }
+.nav-cta::after { display: none !important; }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.hamburger span { width: 24px; height: 1px; background: var(--cream); display: block; }
+@media (max-width: 768px) {
+  .nav { padding: 14px 24px; }
+  .nav.scrolled { padding: 10px 24px; }
+  .hamburger { display: flex; }
+  .nav-links { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: 14px; }
+}
+
+/* PAGE HERO */
+.page-hero { padding: 160px 0 80px; text-align: center; position: relative; z-index: 1; border-bottom: 1px solid var(--border); }
+.page-hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,168,76,0.07) 0%, transparent 70%); pointer-events: none; }
+.eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+.page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 300; line-height: 1.05; color: var(--cream); }
+.page-hero h1 em { font-style: italic; color: var(--gold-light); }
+.page-hero p { margin-top: 18px; font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 480px; margin-left: auto; margin-right: auto; }
+.divider-line { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 24px auto 0; max-width: 200px; }
+.divider-line span { flex: 1; height: 1px; background: var(--border); }
+.divider-line .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
+
+/* MAIN */
+.main { position: relative; z-index: 1; max-width: 1200px; margin: 0 auto; padding: 80px 40px 100px; }
+@media (max-width: 600px) { .main { padding: 60px 20px 80px; } }
+
+/* CATEGORY GRID */
+.cat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2px;
+}
+@media (max-width: 900px) { .cat-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 500px)  { .cat-grid { grid-template-columns: 1fr; } }
+
+/* CATEGORY CARD */
+.cat-card {
+  position: relative;
+  display: block;
+  text-decoration: none;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--border);
+}
+
+.cat-card img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s ease;
+}
+
+.cat-card:hover img { transform: scale(1.06); }
+
+/* Dark overlay — always visible at bottom, stronger on hover */
+.cat-card-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(13,13,13,0.88) 0%,
+    rgba(13,13,13,0.3) 45%,
+    rgba(13,13,13,0.1) 100%
+  );
+  transition: background 0.4s;
+}
+
+.cat-card:hover .cat-card-overlay {
+  background: linear-gradient(
+    to top,
+    rgba(13,13,13,0.92) 0%,
+    rgba(13,13,13,0.5) 55%,
+    rgba(13,13,13,0.2) 100%
+  );
+}
+
+/* Card text */
+.cat-card-body {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  padding: 28px 24px;
+  z-index: 2;
+  transform: translateY(6px);
+  transition: transform 0.4s ease;
+}
+
+.cat-card:hover .cat-card-body { transform: translateY(0); }
+
+.cat-card-label {
+  font-size: 10px; letter-spacing: 0.35em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 6px; display: block;
+}
+
+.cat-card-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.3rem, 2.5vw, 1.8rem);
+  font-weight: 300; color: var(--cream); line-height: 1.2;
+  display: block; margin-bottom: 12px;
+}
+
+.cat-card-cta {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold-light);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.3s 0.05s, transform 0.3s 0.05s;
+}
+
+.cat-card:hover .cat-card-cta { opacity: 1; transform: translateY(0); }
+
+.cat-card-cta::after {
+  content: '→';
+  transition: transform 0.3s;
+}
+
+.cat-card:hover .cat-card-cta::after { transform: translateX(4px); }
+
+/* Image count badge */
+.cat-card-count {
+  position: absolute; top: 16px; right: 16px; z-index: 2;
+  background: rgba(13,13,13,0.75); border: 1px solid var(--border);
+  backdrop-filter: blur(4px);
+  font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase;
+  color: var(--muted); padding: 5px 12px; border-radius: 2px;
+}
+
+/* No cover placeholder */
+.cat-card-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 12px;
+  background: rgba(201,168,76,0.04);
+}
+
+.cat-card-placeholder span { font-size: 36px; opacity: 0.3; }
+.cat-card-placeholder p { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); }
+
+/* CTA BANNER */
+.cta-banner { margin-top: 80px; padding: 56px 48px; background: rgba(201,168,76,0.06); border: 1px solid var(--border); border-radius: 2px; text-align: center; }
+.cta-banner h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: var(--cream); margin-bottom: 12px; }
+.cta-banner h3 em { font-style: italic; color: var(--gold-light); }
+.cta-banner p { font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 460px; margin: 0 auto 32px; }
+.btn-gold { background: var(--gold); color: var(--ink); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
+
+/* FOOTER */
+footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
+.footer-copy { font-size: 12px; color: var(--muted); }
+.footer-links { display: flex; gap: 28px; }
+.footer-links a { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+.footer-links a:hover { color: var(--gold); }
+@media (max-width: 600px) { footer { padding: 32px 24px; flex-direction: column; text-align: center; } .footer-links { justify-content: center; } }
+
+/* ANIMATIONS */
+@keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+.reveal-delay-5 { transition-delay: 0.5s; }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<!-- PROMO BAR -->
+<div class="nav-promo">✦ Exclusive 20% off this week — use code BEYSOS20 ✦</div>
+
+<!-- NAVBAR -->
+<nav class="nav" id="navbar">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop,q=95/Vk75LpTKjSjaGtev/untitled-design-2-bqV3e3351SqyseYc.png" alt="Shots By Beysos"/>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'gallery' %}" class="active">Gallery</a></li>
+    <li><a href="{% url 'home' %}#about">About</a></li>
+    <li><a href="{% url 'home' %}#contact">Contact</a></li>
+    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="eyebrow">Our Work</div>
+  <h1>The <em>Gallery</em></h1>
+  <p>Browse our portfolio of AI-enhanced transformations. Select a category to explore.</p>
+  <div class="divider-line"><span></span><div class="diamond"></div><span></span></div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  {% if categories %}
+<div class="cat-grid">
+  {% for cat in categories %}
+  <a href="{% url 'gallery_category' cat.slug %}" class="cat-card reveal reveal-delay-{{ forloop.counter }}">
+
+    {% if cat.cover_image %}
+      <img src="{{ cat.cover_image.image.url }}" alt="{{ cat.name }}"/>
+    {% else %}
+      <div class="cat-card-placeholder">
+        <span>📷</span>
+        <p>Coming soon</p>
+      </div>
+    {% endif %}
+
+    <div class="cat-card-overlay"></div>
+
+    <div class="cat-card-count">
+      {{ cat.images.count }} image{{ cat.images.count|pluralize }}
+    </div>
+
+    <div class="cat-card-body">
+      <span class="cat-card-label">Category</span>
+      <span class="cat-card-name">{{ cat.name }}</span>
+      <span class="cat-card-cta">Explore collection</span>
+    </div>
+
+  </a>
+  {% endfor %}
+</div>
+
+{% else %}
+<div style="text-align:center;padding:80px 20px;border:1px dashed var(--border);border-radius:2px;">
+  <p style="font-size:36px;margin-bottom:16px;">📷</p>
+  <p style="font-size:14px;color:var(--muted);">No gallery categories yet. Add them from the Django admin panel.</p>
+</div>
+{% endif %}
+
+  <!-- CTA BANNER -->
+  <div class="cta-banner reveal">
+    <h3>Ready for Your Own <em>Transformation?</em></h3>
+    <p>Choose your style, upload your photo, and receive your AI-enhanced image within 24–48 hours.</p>
+    <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-copy">© Lifestro Global 2025. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'gallery' %}">Gallery</a>
+    <a href="{% url 'order_form' %}">Book Now</a>
+    <a href="{% url 'home' %}#contact">Contact</a>
+  </div>
+</footer>
+
+<script>
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+document.getElementById('hamburger').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.toggle('open');
+});
+document.querySelectorAll('.nav-links a').forEach(a => {
+  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+});
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
