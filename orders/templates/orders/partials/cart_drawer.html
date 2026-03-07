@@ -1,0 +1,24 @@
+<!-- CART OVERLAY + DRAWER -->
+<div class="cart-overlay" id="cartOverlay" onclick="toggleCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h3>Your Cart <span id="cartCountLabel">0 items</span></h3>
+    <button class="cart-close" onclick="toggleCart()">×</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="icon">🛒</div>
+      <p>Your cart is empty.<br/>Add images you'd like to book.</p>
+    </div>
+  </div>
+  <div class="cart-drawer-footer">
+    <div class="cart-summary">
+      <span>Selected images</span>
+      <span id="cartFooterCount">0 images</span>
+    </div>
+    <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>
+      Proceed to Book →
+    </button>
+    <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
+  </div>
+</div>
