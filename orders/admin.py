@@ -33,7 +33,7 @@ class OrderPhotoAdmin(admin.ModelAdmin):
 class GalleryImageInline(admin.TabularInline):
     model  = GalleryImage
     extra  = 3
-    fields = ('image', 'title', 'is_cover', 'is_visible')
+    fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
 
 
 @admin.register(GalleryCategory)
@@ -50,6 +50,7 @@ class GalleryCategoryAdmin(admin.ModelAdmin):
 
 @admin.register(GalleryImage)
 class GalleryImageAdmin(admin.ModelAdmin):
-    list_display  = ('__str__', 'category', 'is_cover', 'is_visible', 'uploaded')
-    list_filter   = ('category', 'is_cover', 'is_visible')
-    list_editable = ('is_cover', 'is_visible')
+    list_display  = ('title', 'category', 'price', 'is_cover', 'is_visible', 'uploaded')
+    list_editable = ('price', 'is_cover', 'is_visible')
+    list_filter   = ('category', 'is_visible')
+    search_fields = ('title',)

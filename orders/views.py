@@ -67,12 +67,25 @@ def contact_submit(request):
 
 
 def order_form(request):
-    context = {
+    # Read cart amount if coming from gallery cart
+    cart_amount = request.GET.get('amount')  # in cents
+    if cart_amount:
+        try:
+            price_per_photo = int(cart_amount)
+        except ValueError:
+            price_per_photo = settings.PRICE_PER_PHOTO
+    else:
+        price_per_photo = settings.PRICE_PER_PHOTO
+
+    return render(request, 'orders/order_form.html', {
         'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
-        'price_per_photo':        settings.PRICE_PER_PHOTO,
+        'price_per_photo':        price_per_photo,
         'currency':               settings.CURRENCY,
-    }
-    return render(request, 'orders/order_form.html', context)
+        'prefill_style':          request.GET.get('style', ''),
+        'prefill_notes':          request.GET.get('notes', ''),
+        'prefill_count':          request.GET.get('count', '1'),
+        'cart_data':              request.GET.get('cart', ''),
+    })
 
 
 @require_POST
@@ -80,7 +93,14 @@ def create_payment_intent(request):
     try:
         data        = json.loads(request.body)
         photo_count = int(data.get('photo_count', 1))
-        amount      = settings.PRICE_PER_PHOTO * photo_count
+
+        # Use explicit amount from cart if provided, otherwise calculate from photo count
+        explicit_amount = data.get('amount')
+        if explicit_amount:
+            amount = int(explicit_amount)
+        else:
+            amount = settings.PRICE_PER_PHOTO * photo_count
+
         intent = stripe.PaymentIntent.create(
             amount   = amount,
             currency = settings.CURRENCY,

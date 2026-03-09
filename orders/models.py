@@ -64,12 +64,14 @@ class GalleryImage(models.Model):
     category   = models.ForeignKey(GalleryCategory, related_name='images', on_delete=models.CASCADE)
     image      = models.ImageField(upload_to='gallery/%Y/%m/')
     title      = models.CharField(max_length=200, blank=True)
+    price      = models.DecimalField(max_digits=8, decimal_places=2, default=25.00)  # ← add this
     is_cover   = models.BooleanField(default=False, help_text="Use this image as the category cover photo.")
     is_visible = models.BooleanField(default=True, help_text="Uncheck to hide this image from the gallery.")
     uploaded   = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        ordering = ['-is_cover', '-uploaded']
-
     def __str__(self):
-        return f"{self.title or 'Image'} — {self.category.name}"
+        return self.title or f"Image {self.pk}"
+    
+    @property
+    def price_cents(self):
+        return int(self.price * 100)

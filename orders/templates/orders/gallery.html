@@ -364,15 +364,18 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     </div>
   </div>
   <div class="cart-drawer-footer">
-    <div class="cart-summary">
-      <span>Selected images</span>
-      <span id="cartFooterCount">0 images</span>
-    </div>
-    <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>
-      Proceed to Book →
-    </button>
-    <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
+  <div class="cart-summary">
+    <span>Selected images</span>
+    <span id="cartFooterCount">0 images</span>
   </div>
+  <div class="cart-summary" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
+    <span style="color: var(--cream); font-size: 13px;">Total</span>
+    <span id="cartTotal" style="color: var(--gold); font-size: 16px; font-weight: 500;">$0.00</span>
+  </div>
+  <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>
+    Proceed to Book →
+  </button>
+  <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
 </div>
 
 </body>

@@ -121,8 +121,8 @@ section { position: relative; z-index: 1; }
 @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
 .about-text p { font-size: 15px; color: rgba(245,240,232,0.7); line-height: 1.85; margin-top: 24px; }
 .about-images { position: relative; height: 500px; }
-.about-img-main { position: absolute; top: 0; left: 0; right: 60px; bottom: 60px; background-image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop/Vk75LpTKjSjaGtev/whatsapp-image-2026-02-18-at-16.40.49-WZtDu16m77PfMqPC.jpeg'); background-size: cover; background-position: center; border-radius: 2px; }
-.about-img-accent { position: absolute; bottom: 0; right: 0; width: 55%; height: 55%; background-image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop/Vk75LpTKjSjaGtev/1000119693-DNRS4trEpZrF9D6N.png'); background-size: cover; background-position: center; border-radius: 2px; border: 4px solid var(--ink); box-shadow: 0 0 0 1px var(--border); }
+.about-img-main { position: absolute; top: 0; left: 0; right: 60px; bottom: 60px; background-image: url('https://i.imgur.com/EujL8DQ.jpeg'); background-size: cover; background-position: center; border-radius: 2px; }
+.about-img-accent { position: absolute; bottom: 0; right: 0; width: 55%; height: 69%; background-image: url('https://i.imgur.com/tYnTOuS.jpeg'); background-size: cover; background-position: center; border-radius: 2px; border: 4px solid var(--ink); box-shadow: 0 0 0 1px var(--border); }
 .about-badge { position: absolute; top: 30px; right: 30px; background: rgba(13,13,13,0.9); border: 1px solid var(--border); padding: 14px 18px; border-radius: 2px; text-align: center; backdrop-filter: blur(8px); }
 .about-badge .num { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 600; color: var(--gold); display: block; line-height: 1; }
 .about-badge .lbl { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 4px; display: block; }
@@ -249,8 +249,8 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     <h1 class="hero-title">More Than Images,<br/><em>We Create Experiences</em></h1>
     <p class="hero-sub">Transform ordinary photos into extraordinary, professional-grade visuals using the power of advanced artificial intelligence.</p>
     <div class="hero-actions">
-      <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a>
-      <a href="{% url 'gallery' %}" class="btn-outline">View Gallery</a>
+      <a href="{% url 'gallery' %}" class="btn-gold">View Gallery →</a>
+      {% comment %} <a href="{% url 'gallery' %}" class="btn-outline">View Gallery</a> {% endcomment %}
     </div>
   </div>
   <div class="hero-scroll">
@@ -274,7 +274,9 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
       </div>
       <div class="about-images reveal reveal-delay-2">
         <div class="about-img-main"></div>
+          {% comment %} <img src="https://imgur.com/a/HxoQvS6" alt="About Shots By Beysos"/> {% endcomment %}
         <div class="about-img-accent"></div>
+          {% comment %} <img src="https://imgur.com/a/Ev6wQD2" alt="About Shots By Beysos"/> {% endcomment %}
         <div class="about-badge">
           <span class="num">24h</span>
           <span class="lbl">Turnaround</span>
@@ -402,6 +404,8 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
         <div class="contact-socials">
           <a href="#" class="social-btn">Instagram</a>
           <a href="#" class="social-btn">TikTok</a>
+          <a href="#" class="social-btn">Facebook</a>
+          <a href="#" class="social-btn">Pinterest</a>
         </div>
       </div>
       <div class="reveal reveal-delay-2">
@@ -433,8 +437,8 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <div class="footer-links">
     <a href="{% url 'home' %}">Home</a>
     <a href="#about">About</a>
-    <a href="{% url 'order_form' %}">Book Now</a>
-    <a href="#contact">Contact</a>
+    <a href="{% url 'gallery' %}">Gallery</a>
+    {% comment %} <a href="#contact">Contact</a> {% endcomment %}
   </div>
 </footer>
 
@@ -529,15 +533,19 @@ document.getElementById('contactForm').addEventListener('submit', async function
     </div>
   </div>
   <div class="cart-drawer-footer">
-    <div class="cart-summary">
-      <span>Selected images</span>
-      <span id="cartFooterCount">0 images</span>
-    </div>
-    <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>
-      Proceed to Book →
-    </button>
-    <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
+  <div class="cart-summary">
+    <span>Selected images</span>
+    <span id="cartFooterCount">0 images</span>
   </div>
+  <div class="cart-summary" style="border-top: 1px solid var(--border); padding-top: 12px; margin-top: 4px;">
+    <span style="color: var(--cream); font-size: 13px;">Total</span>
+    <span id="cartTotal" style="color: var(--gold); font-size: 16px; font-weight: 500;">$0.00</span>
+  </div>
+  <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>
+    Proceed to Book →
+  </button>
+  <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
+</div>
 </div>
 </body>
 </html>
