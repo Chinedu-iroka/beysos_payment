@@ -1,12 +1,21 @@
+import json
 from django.contrib import admin
-from .models import Order, OrderPhoto, GalleryCategory, GalleryImage
+from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem
 
 
 class OrderPhotoInline(admin.TabularInline):
     model        = OrderPhoto
     extra        = 0
+    verbose_name         = 'Uploaded Image'
+    verbose_name_plural  = 'Uploaded Images'
     readonly_fields = ('filename', 'photo', 'uploaded')
 
+
+class OrderCartItemInline(admin.TabularInline):
+    model           = OrderCartItem
+    extra           = 0
+    fields          = ('title', 'category', 'price', 'image_url')
+    readonly_fields = ('title', 'category', 'price', 'image_url')
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -14,7 +23,7 @@ class OrderAdmin(admin.ModelAdmin):
     list_filter     = ('status', 'style_chosen', 'created_at')
     search_fields   = ('client_name', 'client_email', 'booking_id', 'stripe_payment_id')
     readonly_fields = ('id', 'created_at', 'updated_at', 'stripe_payment_id')
-    inlines         = [OrderPhotoInline]
+    inlines         = [OrderPhotoInline, OrderCartItemInline]
 
     fieldsets = (
         ('Client Info',      {'fields': ('client_name', 'client_email', 'booking_id')}),
@@ -34,6 +43,13 @@ class GalleryImageInline(admin.TabularInline):
     model  = GalleryImage
     extra  = 3
     fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
+
+
+# class OrderCartItemInline(admin.TabularInline):
+#     model  = OrderCartItem
+#     extra  = 0
+#     fields = ('title', 'category', 'price', 'image_url')
+#     readonly_fields = ('title', 'category', 'price', 'image_url')
 
 
 @admin.register(GalleryCategory)

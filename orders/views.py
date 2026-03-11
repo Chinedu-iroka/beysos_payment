@@ -1,6 +1,7 @@
 import json
 import stripe
 import logging
+import threading
 
 from django.conf import settings
 from django.core.mail import send_mail
@@ -67,14 +68,10 @@ def contact_submit(request):
 
 
 def order_form(request):
-    # Read cart amount if coming from gallery cart
-    cart_amount = request.GET.get('amount')  # in cents
-    if cart_amount:
-        try:
-            price_per_photo = int(cart_amount)
-        except ValueError:
-            price_per_photo = settings.PRICE_PER_PHOTO
-    else:
+    cart_amount = request.GET.get('amount')
+    try:
+        price_per_photo = int(cart_amount) if cart_amount else settings.PRICE_PER_PHOTO
+    except ValueError:
         price_per_photo = settings.PRICE_PER_PHOTO
 
     return render(request, 'orders/order_form.html', {
@@ -84,7 +81,7 @@ def order_form(request):
         'prefill_style':          request.GET.get('style', ''),
         'prefill_notes':          request.GET.get('notes', ''),
         'prefill_count':          request.GET.get('count', '1'),
-        'cart_data':              request.GET.get('cart', ''),
+        'cart_amount':            price_per_photo,
     })
 
 
@@ -130,18 +127,25 @@ def save_order(request):
         style       = request.POST.get('style_chosen', '').strip()
         notes       = request.POST.get('special_notes', '').strip()
         payment_id  = request.POST.get('stripe_payment_id', '').strip()
-        photo_count = len(request.FILES.getlist('photos'))
-        amount      = (settings.PRICE_PER_PHOTO * max(photo_count, 1)) / 100
+        photo_count    = len(request.FILES.getlist('photos'))
+        cart_json      = request.POST.get('cart_items', '[]')
+        cart_items_list = json.loads(cart_json) if cart_json else []
+        cart_count     = len(cart_items_list)
+        stripe_amount = request.POST.get('amount_paid')
+        if stripe_amount:
+            amount = int(stripe_amount) / 100
+        else:
+            amount = (settings.PRICE_PER_PHOTO * max(photo_count, 1)) / 100
         order = Order.objects.create(
             booking_id=booking_id, client_name=name, client_email=email,
-            style_chosen=style, special_notes=notes, photo_count=photo_count,
+            style_chosen=style, special_notes=notes, photo_count=cart_count if cart_count > 0 else photo_count,
             amount_paid=amount, currency=settings.CURRENCY,
             stripe_payment_id=payment_id, status='paid',
         )
         for photo_file in request.FILES.getlist('photos'):
             OrderPhoto.objects.create(order=order, photo=photo_file, filename=photo_file.name)
-        _send_client_confirmation(order)
-        _send_studio_notification(order)
+        threading.Thread(target=_send_client_confirmation, args=(order,), daemon=True).start()
+        threading.Thread(target=_send_studio_notification, args=(order,), daemon=True).start()
         return JsonResponse({'orderId': order.short_id})
     except Exception as e:
         logger.error(f"Error saving order: {e}")

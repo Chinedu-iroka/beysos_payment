@@ -33,15 +33,17 @@ CURRENCY        = 'usd'
 # Using Django's built-in email backend.
 # For production, swap to SMTP or a service like SendGrid / Mailgun.
 # ─────────────────────────────────────────────
-EMAIL_BACKEND       = 'django.core.mail.backends.console.EmailBackend'  # prints to console during dev
-# EMAIL_BACKEND     = 'django.core.mail.backends.smtp.EmailBackend'     # uncomment for production
+# EMAIL_BACKEND       = 'django.core.mail.backends.console.EmailBackend'  # prints to console during dev
+EMAIL_BACKEND     = 'django.core.mail.backends.smtp.EmailBackend'     # uncomment for production
 EMAIL_HOST          = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
-EMAIL_PORT          = 587
-EMAIL_USE_TLS       = True
+EMAIL_PORT    = 465
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+EMAIL_TIMEOUT       = 10
 EMAIL_HOST_USER     = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL  = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@shotsbybeysos.com')
-STUDIO_EMAIL        = os.environ.get('STUDIO_EMAIL', 'hello@shotsbybeysos.com')  # receives order notifications
+STUDIO_EMAIL        = os.environ.get('STUDIO_EMAIL', 'irokachinedu7@gmail.com')  # receives order notifications
 
 # Application definition
 INSTALLED_APPS = [

@@ -508,11 +508,11 @@
   <div class="header">
     <div class="eyebrow">Shots By Beysos</div>
     <h1>Transform Your Photo<br/><em>Into Studio Art</em></h1>
-    <p>Select your style, upload your photo, and receive<br/>your transformed image within 24 hours.</p>
+    <p>Upload your photo and receive<br/>your transformed image within 24 hours.</p>
     <div class="divider"><span></span><div class="diamond"></div><span></span></div>
   </div>
 
-  <!-- Steps -->
+  {% comment %} <!-- Steps -->
   <div class="steps" id="stepsBar">
     <div class="step-item">
       <div class="step-circle active" id="sc1">1</div>
@@ -528,45 +528,13 @@
       <div class="step-circle" id="sc3">3</div>
       <div class="step-label" id="sl3">Payment</div>
     </div>
-  </div>
+  </div> {% endcomment %}
 
   <!-- Card -->
   <div class="card">
 
-    <!-- PANEL 1: Details -->
-    <div class="panel active" id="panel1">
-      <div class="panel-title">Your Details</div>
-      <div class="panel-subtitle">Tell us who you are and which style you'd like.</div>
-
-      <div class="field">
-        <label>Choose Your Style</label>
-        <div class="style-grid" id="styleGrid">
-          <div class="style-card selected" data-style="Professional headshots">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119618-YlJqLOwd9d5691tn.png" alt="Professional headshots" class="style-thumb"/>
-            <div class="style-card-name">Professional headshots</div>
-          </div>
-          <div class="style-card" data-style="Fashion and lifestyle">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119651-GuCdHmTb55Dd26Jg.png" alt="Fashion and lifestyle" class="style-thumb"/>
-            <div class="style-card-name">Fashion and lifestyle</div>
-          </div>
-          <div class="style-card" data-style="Creative and artistic">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/chatgpt-image-feb-27-2026-03_28_04-pm-a89QMLOinCz57JnP.png" alt="Creative and artistic" class="style-thumb"/>
-            <div class="style-card-name">Creative and artistic</div>
-          </div>
-          <div class="style-card" data-style="Brand and corporate">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000107891-1---edited-GBSqPZsbdY8bq237.png" alt="Brand and corporate" class="style-thumb"/>
-            <div class="style-card-name">Brand and corporate</div>
-          </div>
-          <div class="style-card" data-style="Social media content">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/chatgpt-image-feb-27-2026-05_21_45-pm-JbXrdo8Tg1XBLfP2.png" alt="Social media content" class="style-thumb"/>
-            <div class="style-card-name">Social media content</div>
-          </div>
-          <div class="style-card" data-style="Special occasions">
-            <img src="https://assets.zyrosite.com/Vk75LpTKjSjaGtev/1000119658-buf81N5DNfPw2jIX.png" alt="Special occasions" class="style-thumb"/>
-            <div class="style-card-name">Special occasions</div>
-          </div>
-        </div>
-      </div>
+    <!-- SINGLE FORM -->
+    <div id="mainForm">
 
       <div class="field">
         <label>Full Name</label>
@@ -582,25 +550,6 @@
       <div class="field">
         <label>Booking ID</label>
         <input type="text" id="clientID" placeholder="e.g. SBS001"/>
-      </div>
-
-      <div class="msg error" id="msg1"></div>
-
-      <button class="btn btn-primary" onclick="goToStep2()">
-        <span class="btn-label">Continue to Upload →</span>
-        <div class="spinner"></div>
-      </button>
-    </div>
-
-    <!-- PANEL 2: Upload -->
-    <div class="panel" id="panel2">
-      <div class="panel-title">Upload Your Photo</div>
-      <div class="panel-subtitle">Upload the original photo(s) you'd like transformed. Clear, well-lit photos give the best results.</div>
-
-      <div class="selected-style" id="selectedStyleBanner">
-        <div class="style-badge">Style</div>
-        <div class="style-name" id="selectedStyleName">Professional headshots</div>
-        <button class="change-style" onclick="goToStep1()">Change</button>
       </div>
 
       <div class="field">
@@ -619,26 +568,9 @@
         <input type="text" id="specialNotes" placeholder="e.g. Keep my natural hair colour"/>
       </div>
 
-      <div class="msg error" id="msg2"></div>
-
-      <button class="btn btn-primary" onclick="goToStep3()">
-        <span class="btn-label">Continue to Payment →</span>
-        <div class="spinner"></div>
-      </button>
-      <button class="btn btn-ghost" onclick="goToStep1()">← Back</button>
-    </div>
-
-    <!-- PANEL 3: Payment -->
-    <div class="panel" id="panel3">
-      <div class="panel-title">Secure Payment</div>
-      <div class="panel-subtitle">Review your order and complete payment. Your order is only confirmed once payment succeeds.</div>
-
       <div class="summary-box">
-        <div class="summary-row"><span>Client</span><span id="sumName">—</span></div>
-        <div class="summary-row"><span>Email</span><span id="sumEmail">—</span></div>
-        <div class="summary-row"><span>Style</span><span id="sumStyle">—</span></div>
-        <div class="summary-row"><span>Photos</span><span id="sumPhotos">—</span></div>
-        <div class="summary-row total"><span>Total</span><span id="sumTotal">$25.00</span></div>
+        <div class="summary-row"><span>Photos</span><span id="sumPhotos">0 photos</span></div>
+        <div class="summary-row total"><span>Total</span><span id="sumTotal">$0.00</span></div>
       </div>
 
       <div class="field">
@@ -653,7 +585,6 @@
         <span class="btn-label">🔒 Pay & Place Order</span>
         <div class="spinner"></div>
       </button>
-      <button class="btn btn-ghost" onclick="goToStep2()">← Back</button>
 
       <div class="secure-badge">
         <svg width="12" height="14" viewBox="0 0 12 14" fill="none">
@@ -662,6 +593,7 @@
         Secured by Stripe · 256-bit SSL encryption
       </div>
     </div>
+
 
     <!-- PANEL 4: Success -->
     <div class="panel" id="panel4">
@@ -702,6 +634,7 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 const CONFIG = {
   stripePublishableKey: '{{ stripe_publishable_key }}',
   pricePerPhoto:        {{ price_per_photo }},
+  cartAmount:             {{ cart_amount }},
   currency:             '{{ currency }}',
   currencySymbol:       '$',
   csrfToken:            '{{ csrf_token }}',
@@ -710,18 +643,12 @@ const CONFIG = {
 };
 
 // State
-let selectedStyle = 'Professional headshots';
+let selectedStyle = '{{ prefill_style|default:"General"|escapejs }}';
 let uploadedFiles = [];
 let stripe, cardElement;
 
 // Init Stripe
 function initStripe() {
-  if (CONFIG.stripePublishableKey.includes('REPLACE')) {
-    document.getElementById('cardInfo').style.display = 'block';
-    document.getElementById('cardInfo').textContent =
-      '⚠️ Demo mode: Add your Stripe keys to settings.py (or .env) to activate real payments.';
-    return;
-  }
   stripe = Stripe(CONFIG.stripePublishableKey);
   const elements = stripe.elements({
     fonts: [{ cssSrc: 'https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400&display=swap' }]
@@ -743,13 +670,12 @@ function initStripe() {
   cardElement.on('blur',  () => document.getElementById('cardElement').parentElement.classList.remove('focused'));
 }
 
-// Style selection
-document.getElementById('styleGrid').addEventListener('click', e => {
-  const card = e.target.closest('.style-card');
-  if (!card) return;
-  document.querySelectorAll('.style-card').forEach(c => c.classList.remove('selected'));
-  card.classList.add('selected');
-  selectedStyle = card.dataset.style;
+document.addEventListener('DOMContentLoaded', () => {
+  initStripe();
+  updatePricing();
+  // Prefill from cart if coming from gallery
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('notes')) document.getElementById('specialNotes').value = urlParams.get('notes');
 });
 
 // File upload
@@ -768,7 +694,7 @@ uploadZone.addEventListener('drop', e => {
 function handleFiles(files) {
   Array.from(files).forEach(file => {
     if (!file.type.startsWith('image/')) return;
-    if (file.size > 10 * 1024 * 1024) { showMsg('msg2', `${file.name} exceeds 10MB.`); return; }
+    if (file.size > 10 * 1024 * 1024) { showMsg('cardErrors', `${file.name} exceeds 10MB.`); return; }
     if (uploadedFiles.find(f => f.name === file.name)) return;
     uploadedFiles.push(file);
   });
@@ -794,53 +720,32 @@ function renderFilePreviews() {
 }
 
 function updatePricing() {
-  const count = uploadedFiles.length || 1;
-  const total = ((CONFIG.pricePerPhoto * count) / 100).toFixed(2);
-  document.getElementById('sumTotal').textContent  = `${CONFIG.currencySymbol}${total}`;
-  document.getElementById('sumPhotos').textContent = `${uploadedFiles.length} photo${uploadedFiles.length !== 1 ? 's' : ''}`;
+  // Use cart amount if available, otherwise calculate from photo count
+  const cartAmount = CONFIG.cartAmount;
+  let totalCents;
+  if (cartAmount && cartAmount > 0) {
+    totalCents = cartAmount;
+  } else {
+    const count = uploadedFiles.length || 1;
+    totalCents  = CONFIG.pricePerPhoto * count;
+  }
+  const total = (totalCents / 100).toFixed(2);
+  document.getElementById('sumTotal').textContent  = `$${total}`;
+  const cartItems = JSON.parse(localStorage.getItem('beysos_cart') || '[]');
+  const cartCount = cartItems.length > 0 ? cartItems.length : uploadedFiles.length;
+  document.getElementById('sumPhotos').textContent = `${cartCount} photo${cartCount !== 1 ? 's' : ''}`;
 }
 
-// Navigation
+function showMsg(id, text) { const el = document.getElementById(id); if(el){ el.textContent = text; el.style.display = 'block'; } }
+function clearMsg(id)      { const el = document.getElementById(id); if(el) el.style.display = 'none'; }
+
+// Show success screen
 function setStep(n) {
-  [1,2,3,4].forEach(i => {
-    document.getElementById(`panel${i}`).classList.toggle('active', i === n);
-    const sc = document.getElementById(`sc${i}`);
-    const sl = document.getElementById(`sl${i}`);
-    if (!sc) return;
-    sc.className = 'step-circle' + (i < n ? ' done' : i === n ? ' active' : '');
-    sc.textContent = i < n ? '' : i;
-    sl.className = 'step-label' + (i === n ? ' active' : '');
-    const line = document.getElementById(`line${i}`);
-    if (line) line.className = 'step-line' + (i < n ? ' done' : '');
-  });
-  if (n === 3) initStripe();
-}
-
-function showMsg(id, text) { const el = document.getElementById(id); el.textContent = text; el.style.display = 'block'; }
-function clearMsg(id)      { document.getElementById(id).style.display = 'none'; }
-
-function goToStep1() { setStep(1); }
-
-function goToStep2() {
-  clearMsg('msg1');
-  const name    = document.getElementById('clientName').value.trim();
-  const email   = document.getElementById('clientEmail').value.trim();
-  const booking = document.getElementById('clientID').value.trim();
-  if (!name)    return showMsg('msg1', 'Please enter your full name.');
-  if (!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('msg1', 'Please enter a valid email address.');
-  if (!booking) return showMsg('msg1', 'Please enter your Booking ID.');
-  document.getElementById('selectedStyleName').textContent = selectedStyle;
-  setStep(2);
-}
-
-function goToStep3() {
-  clearMsg('msg2');
-  if (uploadedFiles.length === 0) return showMsg('msg2', 'Please upload at least one photo to continue.');
-  document.getElementById('sumName').textContent  = document.getElementById('clientName').value.trim();
-  document.getElementById('sumEmail').textContent = document.getElementById('clientEmail').value.trim();
-  document.getElementById('sumStyle').textContent = selectedStyle;
-  updatePricing();
-  setStep(3);
+  if (n === 4) {
+    document.getElementById('mainForm').style.display = 'none';
+    document.getElementById('panel4').style.display = 'block';
+    document.getElementById('stepsBar') && (document.getElementById('stepsBar').style.display = 'none');
+  }
 }
 
 // ─────────────────────────────────────────────
@@ -875,6 +780,7 @@ async function handlePayment() {
       },
       body: JSON.stringify({
         photo_count:   uploadedFiles.length || 1,
+        amount:        CONFIG.cartAmount || null,
         client_name:   document.getElementById('clientName').value.trim(),
         client_email:  document.getElementById('clientEmail').value.trim(),
         booking_id:    document.getElementById('clientID').value.trim(),
@@ -908,6 +814,8 @@ async function handlePayment() {
       formData.append('style_chosen',      selectedStyle);
       formData.append('special_notes',     document.getElementById('specialNotes').value.trim());
       formData.append('stripe_payment_id', paymentIntent.id);
+      formData.append('amount_paid',       CONFIG.cartAmount || (CONFIG.pricePerPhoto * uploadedFiles.length));
+      formData.append('cart_items',        JSON.stringify(JSON.parse(localStorage.getItem('beysos_cart') || '[]')));
       uploadedFiles.forEach(f => formData.append('photos', f));
 
       const saveRes  = await fetch(CONFIG.saveOrderUrl, {
@@ -962,7 +870,7 @@ function showSuccessScreen(orderId) {
     Proceed to Book →
   </button>
   <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
-</div>
+  </div>
 </div>
 
 </body>
