@@ -147,11 +147,16 @@ function proceedToBook(orderUrl) {
     '&cart='   + encodeURIComponent(JSON.stringify(cart));
 }
 
-function bookNow(orderUrl, category, title, priceCents) {
+function bookNow(orderUrl, id, src, category, title, price, priceCents) {
+  // Add to cart first so order form reads it correctly
+  cartEmpty();
+  cartAdd({ id: id, src: src, title: title, category: category, price: price, price_cents: priceCents });
   window.location.href = orderUrl +
     '?style='  + encodeURIComponent(category) +
     '&notes='  + encodeURIComponent('Selected image: ' + title) +
-    '&amount=' + priceCents;
+    '&count=1' +
+    '&amount=' + priceCents +
+    '&cart='   + encodeURIComponent(JSON.stringify(cartLoad()));
 }
 
 function addToCart(id, src, title, category, price, priceCents) {

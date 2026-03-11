@@ -255,7 +255,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
       </div>
 
       <div class="img-card-actions">
-  <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', {{ img.price_cents }})">
+  <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{{ img.image.url|escapejs }}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
     ✦ Book Now
   </button>
   <button class="btn-add-cart" id="cart-btn-{{ img.id }}" onclick="addToCart({{ img.id }}, '{{ img.image.url }}', '{{ img.title|default:category.name|escapejs }}', '{{ category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
