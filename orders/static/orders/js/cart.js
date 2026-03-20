@@ -166,7 +166,7 @@ function addToCart(id, src, title, category, price, priceCents) {
   var card = document.getElementById('card-' + id);
   if (btn)  { btn.textContent = 'In Cart'; btn.classList.add('added'); }
   if (card) { card.classList.add('in-cart'); }
-  openCart();
+  cartRenderAll();
 }
 
 document.addEventListener('DOMContentLoaded', function() {

@@ -14,8 +14,17 @@ class OrderPhotoInline(admin.TabularInline):
 class OrderCartItemInline(admin.TabularInline):
     model           = OrderCartItem
     extra           = 0
-    fields          = ('title', 'category', 'price', 'image_url')
-    readonly_fields = ('title', 'category', 'price', 'image_url')
+    fields          = ('image_preview', 'title', 'category', 'price')
+    readonly_fields = ('image_preview', 'title', 'category', 'price')
+
+    def image_preview(self, obj):
+        from django.utils.html import format_html
+        if obj.image_url:
+            return format_html('<img src="{}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;"/>', obj.image_url)
+        elif obj.gallery_image and obj.gallery_image.image:
+            return format_html('<img src="{}" style="width:80px;height:80px;object-fit:cover;border-radius:4px;"/>', obj.gallery_image.image.url)
+        return '—'
+    image_preview.short_description = 'Image'
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
@@ -36,12 +45,6 @@ class OrderAdmin(admin.ModelAdmin):
 @admin.register(OrderPhoto)
 class OrderPhotoAdmin(admin.ModelAdmin):
     list_display  = ('filename', 'order', 'uploaded')
-    search_fields = ('filename', 'order__client_name')
-
-
-class GalleryImageInline(admin.TabularInline):
-    model  = GalleryImage
-    extra  = 3
     fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
 
 
@@ -52,16 +55,10 @@ class GalleryImageInline(admin.TabularInline):
 #     readonly_fields = ('title', 'category', 'price', 'image_url')
 
 
-@admin.register(GalleryCategory)
-class GalleryCategoryAdmin(admin.ModelAdmin):
-    list_display  = ('name', 'slug', 'order', 'image_count')
-    list_editable = ('order',)
-    prepopulated_fields = {'slug': ('name',)}
-    inlines       = [GalleryImageInline]
-
-    def image_count(self, obj):
-        return obj.images.filter(is_visible=True).count()
-    image_count.short_description = 'Images'
+class GalleryImageInline(admin.TabularInline):
+    model  = GalleryImage
+    extra  = 3
+    fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
 
 
 @admin.register(GalleryImage)

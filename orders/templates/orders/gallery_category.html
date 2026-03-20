@@ -218,7 +218,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
         <span class="cart-badge" id="cartBadge">0</span>
       </button>
     </li>
-    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+    {% comment %} <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li> {% endcomment %}
   </ul>
   <button class="hamburger" id="hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
@@ -277,7 +277,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <div class="cta-banner reveal">
     <h3>Love What You See? <em>Book Yours.</em></h3>
     <p>Get your own AI-enhanced photos in the <strong style="color:var(--cream)">{{ category.name }}</strong> style.</p>
-    <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a>
+    {% comment %} <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a> {% endcomment %}
   </div>
 </div>
 
@@ -287,7 +287,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <div class="footer-links">
     <a href="{% url 'home' %}">Home</a>
     <a href="{% url 'gallery' %}">Gallery</a>
-    <a href="{% url 'order_form' %}">Book Now</a>
+    {% comment %} <a href="{% url 'order_form' %}">Book Now</a> {% endcomment %}
     <a href="{% url 'home' %}#contact">Contact</a>
   </div>
 </footer>

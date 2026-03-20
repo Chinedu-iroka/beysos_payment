@@ -26,9 +26,9 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 .nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: var(--ink); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
 
 /* NAVBAR */
-.nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: space-between; padding: 22px 60px; transition: background 0.4s, padding 0.4s; }
-.nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
-.nav-logo img { height: 42px; }
+.nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: flex-end; padding: 22px 60px 22px 180px;}
+.nav-logo { position: absolute; top: -10px; left: 60px; z-index: 102; }
+.nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
 .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
 .nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
 .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
@@ -234,7 +234,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     <span class="cart-badge" id="cartBadge">0</span>
   </button>
 </li>
-    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+    {% comment %} <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li> {% endcomment %}
   </ul>
   <button class="hamburger" id="hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
@@ -402,10 +402,10 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
           </div>
         </div>
         <div class="contact-socials">
-          <a href="#" class="social-btn">Instagram</a>
-          <a href="#" class="social-btn">TikTok</a>
-          <a href="#" class="social-btn">Facebook</a>
-          <a href="#" class="social-btn">Pinterest</a>
+          <a href="https://www.instagram.com/shotsbybeysos?igsh=ZDlrbXc0MG1zYXhn" class="social-btn">Instagram</a>
+          <a href="https://www.tiktok.com/@shotbybeysos?_r=1&_t=ZN-94IHWLQdgLG" class="social-btn">TikTok</a>
+          <a href="https://www.facebook.com/share/17eL2VTJhk/" class="social-btn">Facebook</a>
+          <a href="https://pin.it/5nn7FtBER" class="social-btn">Pinterest</a>
         </div>
       </div>
       <div class="reveal reveal-delay-2">

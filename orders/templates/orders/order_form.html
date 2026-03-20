@@ -495,7 +495,7 @@
     <span class="cart-badge" id="cartBadge">0</span>
   </button>
 </li>
-    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+    {% comment %} <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li> {% endcomment %}
   </ul>
   <button class="hamburger" id="hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
@@ -547,10 +547,10 @@
         <div class="hint">Your transformed photo and receipt will be sent here.</div>
       </div>
 
-      <div class="field">
+      {% comment %} <div class="field">
         <label>Booking ID</label>
         <input type="text" id="clientID" placeholder="e.g. SBS001"/>
-      </div>
+      </div> {% endcomment %}
 
       <div class="field">
         <label>Upload Photo(s)</label>
@@ -783,7 +783,7 @@ async function handlePayment() {
         amount:        CONFIG.cartAmount || null,
         client_name:   document.getElementById('clientName').value.trim(),
         client_email:  document.getElementById('clientEmail').value.trim(),
-        booking_id:    document.getElementById('clientID').value.trim(),
+        {% comment %} booking_id:    document.getElementById('clientID').value.trim(), {% endcomment %}
         style_chosen:  selectedStyle,
         special_notes: document.getElementById('specialNotes').value.trim(),
       }),
@@ -810,7 +810,7 @@ async function handlePayment() {
       const formData = new FormData();
       formData.append('client_name',       document.getElementById('clientName').value.trim());
       formData.append('client_email',      document.getElementById('clientEmail').value.trim());
-      formData.append('booking_id',        document.getElementById('clientID').value.trim());
+      {% comment %} formData.append('booking_id',        document.getElementById('clientID').value.trim()); {% endcomment %}
       formData.append('style_chosen',      selectedStyle);
       formData.append('special_notes',     document.getElementById('specialNotes').value.trim());
       formData.append('stripe_payment_id', paymentIntent.id);

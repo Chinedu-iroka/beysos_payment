@@ -10,7 +10,7 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 
-from .models import Order, OrderPhoto
+from .models import Order, OrderPhoto, GalleryImage, OrderCartItem
 
 logger = logging.getLogger(__name__)
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -144,6 +144,22 @@ def save_order(request):
         )
         for photo_file in request.FILES.getlist('photos'):
             OrderPhoto.objects.create(order=order, photo=photo_file, filename=photo_file.name)
+
+        for item in cart_items_list:
+            gallery_image = None
+            try:
+                gallery_image = GalleryImage.objects.get(id=item.get('id'))
+            except GalleryImage.DoesNotExist:
+                pass
+            OrderCartItem.objects.create(
+                order         = order,
+                gallery_image = gallery_image,
+                title         = item.get('title', ''),
+                category      = item.get('category', ''),
+                price         = item.get('price', 0),
+                image_url     = item.get('src', ''),
+            )
+
         threading.Thread(target=_send_client_confirmation, args=(order,), daemon=True).start()
         threading.Thread(target=_send_studio_notification, args=(order,), daemon=True).start()
         return JsonResponse({'orderId': order.short_id})
