@@ -148,7 +148,7 @@ function proceedToBook(orderUrl) {
 }
 
 function bookNow(orderUrl, id, src, category, title, price, priceCents) {
-  // Add to cart first so order form reads it correctly
+  // this is where my order form reads it correctly
   cartEmpty();
   cartAdd({ id: id, src: src, title: title, category: category, price: price, price_cents: priceCents });
   window.location.href = orderUrl +

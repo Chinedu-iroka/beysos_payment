@@ -629,7 +629,7 @@ document.querySelectorAll('.nav-links a').forEach(a => {
 });
 
 // ─────────────────────────────────────────────
-// Django injects these values from settings.py
+// values
 // ─────────────────────────────────────────────
 const CONFIG = {
   stripePublishableKey: '{{ stripe_publishable_key }}',
@@ -673,6 +673,7 @@ function initStripe() {
 document.addEventListener('DOMContentLoaded', () => {
   initStripe();
   updatePricing();
+
   // Prefill from cart if coming from gallery
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('notes')) document.getElementById('specialNotes').value = urlParams.get('notes');
@@ -750,7 +751,7 @@ function setStep(n) {
 
 // ─────────────────────────────────────────────
 // PAYMENT FLOW
-// 1. Ask Django backend to create a Stripe PaymentIntent
+// 1. create a Stripe PaymentIntent
 // 2. Confirm card payment with Stripe.js
 // 3. On success, POST order + photos to Django backend
 // ─────────────────────────────────────────────
@@ -771,7 +772,7 @@ async function handlePayment() {
   btn.classList.add('loading'); btn.disabled = true;
 
   try {
-    // Step 1: Create PaymentIntent via Django backend
+    // Create PaymentIntent
     const intentRes = await fetch(CONFIG.createPaymentIntentUrl, {
       method: 'POST',
       headers: {
@@ -792,7 +793,7 @@ async function handlePayment() {
     const intentData = await intentRes.json();
     if (!intentRes.ok || intentData.error) throw new Error(intentData.error || 'Could not initiate payment.');
 
-    // Step 2: Confirm card payment with Stripe.js
+    // Confirm card payment with Stripe.js
     const { paymentIntent, error } = await stripe.confirmCardPayment(intentData.clientSecret, {
       payment_method: {
         card: cardElement,
@@ -806,7 +807,7 @@ async function handlePayment() {
     if (error) { showMsg('cardErrors', error.message); btn.classList.remove('loading'); btn.disabled = false; return; }
 
     if (paymentIntent.status === 'succeeded') {
-      // Step 3: Save order + upload photos to Django
+      // Save order + upload photos to Django
       const formData = new FormData();
       formData.append('client_name',       document.getElementById('clientName').value.trim());
       formData.append('client_email',      document.getElementById('clientEmail').value.trim());
