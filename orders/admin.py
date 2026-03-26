@@ -2,14 +2,12 @@ import json
 from django.contrib import admin
 from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem
 
-
 class OrderPhotoInline(admin.TabularInline):
-    model        = OrderPhoto
-    extra        = 0
-    verbose_name         = 'Uploaded Image'
-    verbose_name_plural  = 'Uploaded Images'
-    readonly_fields = ('filename', 'photo', 'uploaded')
-
+    model               = OrderPhoto
+    extra               = 0
+    verbose_name        = 'Uploaded Image'
+    verbose_name_plural = 'Uploaded Images'
+    readonly_fields     = ('filename', 'photo', 'uploaded')
 
 class OrderCartItemInline(admin.TabularInline):
     model           = OrderCartItem
@@ -33,7 +31,6 @@ class OrderAdmin(admin.ModelAdmin):
     search_fields   = ('client_name', 'client_email', 'booking_id', 'stripe_payment_id')
     readonly_fields = ('id', 'created_at', 'updated_at', 'stripe_payment_id')
     inlines         = [OrderPhotoInline, OrderCartItemInline]
-
     fieldsets = (
         ('Client Info',      {'fields': ('client_name', 'client_email', 'booking_id')}),
         ('Order Details',    {'fields': ('style_chosen', 'special_notes', 'photo_count', 'amount_paid', 'currency')}),
@@ -41,25 +38,21 @@ class OrderAdmin(admin.ModelAdmin):
         ('Timestamps',       {'fields': ('id', 'created_at', 'updated_at'), 'classes': ('collapse',)}),
     )
 
-
 @admin.register(OrderPhoto)
 class OrderPhotoAdmin(admin.ModelAdmin):
-    list_display  = ('filename', 'order', 'uploaded')
-    fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
-
-
-# class OrderCartItemInline(admin.TabularInline):
-#     model  = OrderCartItem
-#     extra  = 0
-#     fields = ('title', 'category', 'price', 'image_url')
-#     readonly_fields = ('title', 'category', 'price', 'image_url')
-
+    list_display = ('filename', 'order', 'uploaded')
 
 class GalleryImageInline(admin.TabularInline):
     model  = GalleryImage
     extra  = 3
     fields = ('image', 'title', 'price', 'is_cover', 'is_visible')
 
+@admin.register(GalleryCategory)
+class GalleryCategoryAdmin(admin.ModelAdmin):
+    list_display        = ('name', 'slug', 'order')
+    list_editable       = ('order',)
+    prepopulated_fields = {'slug': ('name',)}
+    inlines             = [GalleryImageInline]
 
 @admin.register(GalleryImage)
 class GalleryImageAdmin(admin.ModelAdmin):
@@ -67,3 +60,5 @@ class GalleryImageAdmin(admin.ModelAdmin):
     list_editable = ('price', 'is_cover', 'is_visible')
     list_filter   = ('category', 'is_visible')
     search_fields = ('title',)
+    
+      
