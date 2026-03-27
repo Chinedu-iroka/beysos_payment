@@ -9,28 +9,29 @@
 <script src="{% static 'orders/js/cart.js' %}"></script>
 <style>
 :root {
-  --ink:        #0d0d0d;
-  --cream:      #f5f0e8;
-  --gold:       #c9a84c;
-  --gold-light: #e8d5a0;
-  --muted:      #8a8070;
-  --border:     rgba(201,168,76,0.22);
+  --ink:        #1a0533;
+  --cream:      #050505;
+  --gold:       #00D4FF;
+  --gold-light: #D946EF;
+  --muted:      #6B7280;
+  --border:     rgba(107,33,168,0.2);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+body { background: #ffffff; color: #1a0533; font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
 
 .grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.045; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
-/* PROMO BAR */
+/* PROMO BAR */ 
 .nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: var(--ink); text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
 
 /* NAVBAR */
 .nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: flex-end; padding: 22px 60px 22px 180px;}
+.nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
 .nav-logo { position: absolute; top: -10px; left: 60px; z-index: 102; }
-.nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.4)); }
+.nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px #FFFFFF;) }
 .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
-.nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
+.nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #00D4FF; text-decoration: none; transition: color 0.3s; position: relative; }
 .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
 .nav-links a:hover { color: var(--gold); }
 .nav-links a:hover::after { transform: scaleX(1); }
@@ -85,14 +86,14 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 
 /* HERO */
 .hero { position: relative; min-height: 100vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.hero-bg { position: absolute; inset: 0; background-image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/Vk75LpTKjSjaGtev/1000119617-6iXzEmoDQZiewgm8.png'); background-size: cover; background-position: center; animation: heroZoom 12s ease-in-out infinite alternate; }
+.hero-bg { position: absolute; inset: 0; background-image: url('https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=1920,fit=crop/Vk75LpTKjSjaGtev/1000119617-6iXzEmoDQZiewgm8.png'); background-size: contain; background-position: center top; animation: heroZoom 12s ease-in-out infinite alternate; }
 .hero-bg::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(13,13,13,0.55) 0%, rgba(13,13,13,0.3) 40%, rgba(13,13,13,0.7) 85%, rgba(13,13,13,1) 100%); }
 @keyframes heroZoom { from { transform: scale(1.05); } to { transform: scale(1.12); } }
 .hero-content { position: relative; z-index: 2; text-align: center; padding: 0 24px; margin-top: 80px; }
-.hero-eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; animation: fadeUp 1s 0.2s ease both; }
-.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 9vw, 7rem); font-weight: 300; line-height: 1.0; color: var(--cream); margin-bottom: 28px; animation: fadeUp 1s 0.4s ease both; }
-.hero-title em { font-style: italic; color: var(--gold-light); }
-.hero-sub { font-size: 15px; color: rgba(245,240,232,0.7); line-height: 1.8; max-width: 480px; margin: 0 auto 48px; animation: fadeUp 1s 0.6s ease both; }
+.hero-eyebrow { font-size: 15px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 24px; animation: fadeUp 1s 0.2s ease both; }
+.hero-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(3rem, 9vw, 7rem); font-weight: 300; line-height: 1.0; color: #ffffff; margin-bottom: 28px; animation: fadeUp 1s 0.4s ease both; }
+.hero-title em { font-style: italic; color: var(--gold); }
+.hero-sub { font-size: 17px; color: rgba(245,240,232,0.7); line-height: 1.8; max-width: 480px; margin: 0 auto 48px; animation: fadeUp 1s 0.6s ease both;}
 .hero-actions { display: flex; align-items: center; justify-content: center; gap: 16px; flex-wrap: wrap; animation: fadeUp 1s 0.8s ease both; }
 .hero-scroll { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; animation: fadeUp 1s 1.2s ease both; }
 .scroll-line { width: 1px; height: 48px; background: linear-gradient(to bottom, var(--gold), transparent); animation: scrollPulse 2s ease-in-out infinite; }
@@ -108,9 +109,9 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 section { position: relative; z-index: 1; }
 .section-inner { max-width: 1100px; margin: 0 auto; padding: 0 40px; }
 @media (max-width: 600px) { .section-inner { padding: 0 20px; } }
-.section-label { font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; }
+.section-label { font-size: 15px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 14px; font-weight: bold; }
 .section-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.2rem); font-weight: 300; line-height: 1.15; color: var(--cream); }
-.section-title em { font-style: italic; color: var(--gold-light); }
+.section-title em { font-style: italic; color: var(--gold); }
 .divider-line { display: flex; align-items: center; gap: 14px; margin: 20px 0 0; }
 .divider-line span { flex: 1; height: 1px; background: var(--border); max-width: 80px; }
 .divider-line .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
@@ -119,13 +120,13 @@ section { position: relative; z-index: 1; }
 .about { padding: 120px 0; }
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
 @media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
-.about-text p { font-size: 15px; color: rgba(245,240,232,0.7); line-height: 1.85; margin-top: 24px; }
+.about-text p { font-size: 15px; color: #1A0A2E; line-height: 1.85; margin-top: 24px; }
 .about-images { position: relative; height: 500px; }
-.about-img-main { position: absolute; top: 0; left: 0; right: 60px; bottom: 60px; background-image: url('https://i.imgur.com/EujL8DQ.jpeg'); background-size: cover; background-position: center; border-radius: 2px; }
-.about-img-accent { position: absolute; bottom: 0; right: 0; width: 55%; height: 69%; background-image: url('https://i.imgur.com/tYnTOuS.jpeg'); background-size: cover; background-position: center; border-radius: 2px; border: 4px solid var(--ink); box-shadow: 0 0 0 1px var(--border); }
+.about-img-main { position: absolute; top: 0; left: 0; right: 60px; bottom: 60px; background-image: url('https://res.cloudinary.com/dvpzskh3t/image/upload/v1774606632/before_gv4lyp.jpg'); background-size: cover; background-position: center; border-radius: 2px; }
+.about-img-accent { position: absolute; bottom: 0; right: 0; width: 55%; height: 69%; background-image: url('https://res.cloudinary.com/dvpzskh3t/image/upload/v1774606904/after_oczzwx.png'); background-size: cover; background-position: center; border-radius: 2px; border: 4px solid var(--ink); box-shadow: 0 0 0 1px var(--border); }
 .about-badge { position: absolute; top: 30px; right: 30px; background: rgba(13,13,13,0.9); border: 1px solid var(--border); padding: 14px 18px; border-radius: 2px; text-align: center; backdrop-filter: blur(8px); }
 .about-badge .num { font-family: 'Cormorant Garamond', serif; font-size: 2.4rem; font-weight: 600; color: var(--gold); display: block; line-height: 1; }
-.about-badge .lbl { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-top: 4px; display: block; }
+.about-badge .lbl { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-top: 4px; display: block; }
 
 /* HOW IT WORKS */
 .how { padding: 100px 0; background: rgba(255,255,255,0.015); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
@@ -134,11 +135,11 @@ section { position: relative; z-index: 1; }
 .how-steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; }
 @media (max-width: 700px) { .how-steps { grid-template-columns: 1fr; } }
 .how-step { padding: 40px 36px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); position: relative; overflow: hidden; transition: background 0.3s, border-color 0.3s; }
-.how-step:hover { background: rgba(201,168,76,0.05); border-color: rgba(201,168,76,0.4); }
-.how-step-num { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; color: rgba(201,168,76,0.12); line-height: 1; position: absolute; top: 16px; right: 20px; pointer-events: none; }
+.how-step:hover { background: rgba(92, 90, 86, 0.05); border-color: rgba(58, 58, 58, 0.4); }
+.how-step-num { font-family: 'Cormorant Garamond', serif; font-size: 5rem; font-weight: 300; color: var(--gold); line-height: 1; position: absolute; top: 16px; right: 20px; pointer-events: none; }
 .how-step-icon { font-size: 28px; margin-bottom: 16px; }
 .how-step h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.35rem; font-weight: 400; color: var(--cream); margin-bottom: 12px; }
-.how-step p { font-size: 13px; color: var(--muted); line-height: 1.75; }
+.how-step p { font-size: 13px; color: var(--cream); line-height: 1.75; }
 
 /* BEFORE / AFTER */
 .ba { padding: 100px 0; }
@@ -161,8 +162,8 @@ section { position: relative; z-index: 1; }
 @media (max-width: 640px) { .test-grid { grid-template-columns: 1fr; } }
 .test-card { padding: 36px 32px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); border-radius: 2px; transition: border-color 0.3s, background 0.3s; }
 .test-card:hover { border-color: rgba(201,168,76,0.4); background: rgba(201,168,76,0.04); }
-.test-quote { font-family: 'Cormorant Garamond', serif; font-size: 4rem; line-height: 0.6; color: rgba(201,168,76,0.2); margin-bottom: 16px; display: block; }
-.test-card p { font-size: 14px; color: rgba(245,240,232,0.75); line-height: 1.8; margin-bottom: 28px; font-style: italic; }
+.test-quote { font-family: 'Cormorant Garamond', serif; font-size: 4rem; line-height: 0.6; color: var(--gold); margin-bottom: 16px; display: block; }
+.test-card p { font-size: 14px; color: #1A0A2E; line-height: 1.8; margin-bottom: 28px; font-style: italic; }
 .test-author { display: flex; align-items: center; gap: 14px; }
 .test-author img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; border: 1px solid var(--border); }
 .test-author-info .name { font-size: 13px; color: var(--cream); font-weight: 500; }
@@ -176,14 +177,14 @@ section { position: relative; z-index: 1; }
 .contact p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-top: 20px; }
 .contact-detail { display: flex; align-items: flex-start; gap: 14px; margin-top: 28px; }
 .contact-detail-icon { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: rgba(201,168,76,0.06); }
-.contact-detail-text .lbl { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+.contact-detail-text .lbl { font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
 .contact-detail-text .val { font-size: 14px; color: var(--cream); }
 .contact-socials { margin-top: 32px; display: flex; gap: 12px; }
 .social-btn { display: inline-flex; align-items: center; gap: 8px; padding: 9px 18px; border: 1px solid var(--border); border-radius: 2px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: all 0.3s; background: rgba(255,255,255,0.02); }
 .social-btn:hover { color: var(--gold); border-color: rgba(201,168,76,0.4); }
 .contact-form { display: flex; flex-direction: column; gap: 16px; }
 .form-field { display: flex; flex-direction: column; gap: 7px; }
-.form-field label { font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); }
+.form-field label { font-size: 12px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); }
 .form-field input, .form-field textarea { background: rgba(255,255,255,0.04); border: 1px solid var(--border); border-radius: 2px; padding: 13px 16px; color: var(--cream); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; outline: none; transition: border-color 0.3s, box-shadow 0.3s; resize: none; }
 .form-field input::placeholder, .form-field textarea::placeholder { color: rgba(138,128,112,0.5); }
 .form-field input:focus, .form-field textarea:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(201,168,76,0.1); }
@@ -215,7 +216,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
 <div class="grain"></div>
 
 <!-- PROMO BAR -->
-<div class="nav-promo">✦ Exclusive 20% off this week — use code BEYSOS20 ✦</div>
+<div class="nav-promo">✦ Book Your Session Today & Receive Your Transformed Photo in 24–48 Hours ✦</div>
 
 <!-- NAVBAR -->
 <nav class="nav" id="navbar">
@@ -247,7 +248,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <div class="hero-content">
     <div class="hero-eyebrow">AI-Powered Photo Studio · London</div>
     <h1 class="hero-title">More Than Images,<br/><em>We Create Experiences</em></h1>
-    <p class="hero-sub">Transform ordinary photos into extraordinary, professional-grade visuals using the power of advanced artificial intelligence.</p>
+    <p class="hero-sub">Transform ordinary photos into extraordinary, professional visuals using the power of advanced artificial intelligence.</p>
     <div class="hero-actions">
       <a href="{% url 'gallery' %}" class="btn-gold">View Gallery →</a>
       {% comment %} <a href="{% url 'gallery' %}" class="btn-outline">View Gallery</a> {% endcomment %}
@@ -267,7 +268,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
         <div class="section-label">About Us</div>
         <h2 class="section-title">More than images, we create<br/><em>experiences with AI</em></h2>
         <div class="divider-line"><span></span><div class="diamond"></div><span></span></div>
-        <p>Welcome to Shots by Beysos — where technology meets artistry to redefine the way you see yourself. We are a creative AI-powered image studio based in London, dedicated to transforming ordinary client photos into extraordinary, professional-grade visuals that tell your unique story.</p>
+        <p>Welcome to Shots by Beysos where technology meets artistry to redefine the way you see yourself. We are a creative AI-powered image studio based in London, dedicated to transforming ordinary client photos into extraordinary, professional-grade visuals that tell your unique story.</p>
         <p>We believe that every person deserves to look and feel their absolute best, and that great imagery should not be limited by access to expensive studios or professional photographers. That is exactly why we built this studio.</p>
         <p>Using the power of advanced artificial intelligence, we bring out the best version of you in every single image.</p>
         <a href="{% url 'gallery' %}" class="btn-gold" style="margin-top:32px;display:inline-flex;">Get Started →</a>
@@ -299,13 +300,13 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
         <div class="how-step-num">01</div>
         <div class="how-step-icon">🖼️</div>
         <h3>Choose Your Style</h3>
-        <p>Browse our gallery and select the template category that fits your vision — from professional headshots to creative editorial looks.</p>
+        <p>Browse our gallery and select the template category that fits your vision from professional headshots to creative editorial looks.</p>
       </div>
       <div class="how-step reveal reveal-delay-2">
         <div class="how-step-num">02</div>
         <div class="how-step-icon">📸</div>
         <h3>Upload Your Photo</h3>
-        <p>Book your session and upload your original photo. We accept JPG, PNG and WEBP files up to 10MB each.</p>
+        <p>Book Now and upload your original photo. We accept JPG, PNG and WEBP files up to 10MB each.</p>
       </div>
       <div class="how-step reveal reveal-delay-3">
         <div class="how-step-num">03</div>
@@ -364,7 +365,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
       </div>
       <div class="test-card reveal reveal-delay-2">
         <span class="test-quote">"</span>
-        <p>Shots by Beysos transformed my fashion photos with such elegance and creativity — beyond anything I could have imagined. Absolutely worth every penny.</p>
+        <p>Shots by Beysos transformed my fashion photos with such elegance and creativity beyond anything I could have imagined. Absolutely worth every penny.</p>
         <div class="test-author">
           <img src="https://images.unsplash.com/photo-1573308545502-5ab2e5f2e09e?auto=format&fit=crop&w=48&h=48" alt="Mark T."/>
           <div class="test-author-info">

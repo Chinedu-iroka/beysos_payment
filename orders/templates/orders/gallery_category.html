@@ -9,16 +9,16 @@
 <script src="{% static 'orders/js/cart.js' %}"></script>
 <style>
 :root {
-  --ink:        #0d0d0d;
-  --cream:      #f5f0e8;
-  --gold:       #c9a84c;
-  --gold-light: #e8d5a0;
-  --muted:      #8a8070;
-  --border:     rgba(201,168,76,0.22);
+  --ink:        #1a0533;
+  --cream:      #ffffff;
+  --gold:       #00D4FF;
+  --gold-light: #D946EF;
+  --muted:      #6B7280;
+  --border:     rgba(107,33,168,0.2);
 }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
-body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
+body { background: #ffffff; color: #1a0533; font-family: 'DM Sans', sans-serif; font-weight: 300; overflow-x: hidden; }
 
 .grain { position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.045; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"); }
 
@@ -75,7 +75,7 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 .breadcrumb a:hover { text-decoration: underline; }
 .eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
 .page-hero h1 { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.8rem, 7vw, 5.5rem); font-weight: 300; line-height: 1.05; color: var(--cream); }
-.page-hero h1 em { font-style: italic; color: var(--gold-light); }
+.page-hero h1 em { font-style: italic; color: var(--gold); }
 .page-hero p { margin-top: 18px; font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 480px; margin-left: auto; margin-right: auto; }
 .divider-line { display: flex; align-items: center; justify-content: center; gap: 14px; margin: 24px auto 0; max-width: 200px; }
 .divider-line span { flex: 1; height: 1px; background: var(--border); }
@@ -85,7 +85,7 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 .cat-nav { position: relative; z-index: 1; border-bottom: 1px solid var(--border); padding: 0 40px; display: flex; gap: 0; overflow-x: auto; }
 .cat-nav::-webkit-scrollbar { display: none; }
 .cat-nav a { flex-shrink: 0; padding: 18px 20px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.3s; white-space: nowrap; }
-.cat-nav a:hover { color: var(--cream); }
+.cat-nav a:hover { color: var(--gold); }
 .cat-nav a.active { color: var(--gold); border-bottom-color: var(--gold); }
 @media (max-width: 600px) { .cat-nav { padding: 0 20px; } }
 
@@ -176,12 +176,12 @@ body { background: var(--ink); color: var(--cream); font-family: 'DM Sans', sans
 }
 
 /* CTA BANNER */
-.cta-banner { margin-top: 60px; padding: 56px 48px; background: rgba(201,168,76,0.06); border: 1px solid var(--border); border-radius: 2px; text-align: center; }
-.cta-banner h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: var(--cream); margin-bottom: 12px; }
-.cta-banner h3 em { font-style: italic; color: var(--gold-light); }
-.cta-banner p { font-size: 14px; color: var(--muted); line-height: 1.8; max-width: 460px; margin: 0 auto 32px; }
+.cta-banner { margin-top: 60px; padding: 56px 48px; background: rgba(211, 211, 211, 0.06); border: 1px solid var(--border); border-radius: 2px; text-align: center; }
+.cta-banner h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: var(--ink); margin-bottom: 12px; }
+.cta-banner h3 em { font-style: italic; color: var(--gold); }
+.cta-banner p { font-size: 14px; color: var(--ink); line-height: 1.8; max-width: 460px; margin: 0 auto 32px; }
 .btn-gold { background: var(--gold); color: var(--ink); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
-.btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
+.btn-gold:hover { background: var(--gold); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(54, 54, 54, 0.3); }
 
 /* FOOTER */
 footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
@@ -200,7 +200,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
 <div class="grain"></div>
 
 <!-- PROMO BAR -->
-<div class="nav-promo">✦ Exclusive 20% off this week — use code BEYSOS20 ✦</div>
+<div class="nav-promo">✦ Book Your Session Today & Receive Your Transformed Photo in 24–48 Hours ✦</div>
 
 <!-- NAVBAR -->
 <nav class="nav" id="navbar">
@@ -276,7 +276,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
 
   <div class="cta-banner reveal">
     <h3>Love What You See? <em>Book Yours.</em></h3>
-    <p>Get your own AI-enhanced photos in the <strong style="color:var(--cream)">{{ category.name }}</strong> style.</p>
+    <p>Get your own AI-enhanced photos in the <strong style="color:var(--gold)">{{ category.name }}</strong> style.</p>
     {% comment %} <a href="{% url 'order_form' %}" class="btn-gold">Place Your Order →</a> {% endcomment %}
   </div>
 </div>
