@@ -343,18 +343,26 @@ const navbar = document.getElementById('navbar');
 window.addEventListener('scroll', () => {
   navbar.classList.toggle('scrolled', window.scrollY > 60);
 });
-document.getElementById('hamburger').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-  document.getElementById('navClose').classList.toggle('open');
-  document.getElementById('hamburger').style.display = 'none';
-});
-document.getElementById('navClose').addEventListener('click', () => {
+function openMenu() {
+  document.getElementById('navLinks').classList.add('open');
+  document.getElementById('navClose').classList.add('open');
+  document.getElementById('hamburger').style.visibility = 'hidden';
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+}
+function closeMenu() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navClose').classList.remove('open');
-  document.getElementById('hamburger').style.display = 'flex';
-});
+  document.getElementById('hamburger').style.visibility = 'visible';
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+}
+document.getElementById('hamburger').addEventListener('click', openMenu);
+document.getElementById('navClose').addEventListener('click', closeMenu);
 document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+  a.addEventListener('click', closeMenu);
 });
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });

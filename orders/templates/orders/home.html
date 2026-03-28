@@ -40,7 +40,8 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .nav-cta:hover { background: var(--gold-light) !important; }
 .nav-cta::after { display: none !important; }
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
-.nav-close { display: none; background: none; border: none; color: #00D4FF; font-size: 28px; cursor: pointer; padding: 4px; position: fixed; top: 20px; right: 24px; z-index: 1001; }
+.nav-close { display: none; background: none; border: none; color: #00D4FF; font-size: 28px; cursor: pointer; padding: 4px; position: fixed; top: 16px; right: 24px; z-index: 1001; }
+.nav-close.open { display: block; }
 .hamburger span { width: 24px; height: 1px; background: #00D4FF; display: block; }
 @media (max-width: 768px) {
   .nav-close { display: none; }
@@ -466,18 +467,26 @@ window.addEventListener('scroll', () => {
 });
 
 // Mobile menu
-document.getElementById('hamburger').addEventListener('click', () => {
-  document.getElementById('navLinks').classList.toggle('open');
-  document.getElementById('navClose').classList.toggle('open');
-  document.getElementById('hamburger').style.display = 'none';
-});
-document.getElementById('navClose').addEventListener('click', () => {
+function openMenu() {
+  document.getElementById('navLinks').classList.add('open');
+  document.getElementById('navClose').classList.add('open');
+  document.getElementById('hamburger').style.visibility = 'hidden';
+  document.body.style.overflow = ''; document.body.style.position = ''; document.body.style.width = '';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+}
+function closeMenu() {
   document.getElementById('navLinks').classList.remove('open');
   document.getElementById('navClose').classList.remove('open');
-  document.getElementById('hamburger').style.display = 'flex';
-});
+  document.getElementById('hamburger').style.visibility = 'visible';
+  document.body.style.overflow = ''; document.body.style.position = ''; document.body.style.width = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+}
+document.getElementById('hamburger').addEventListener('click', openMenu);
+document.getElementById('navClose').addEventListener('click', closeMenu);
 document.querySelectorAll('.nav-links a').forEach(a => {
-  a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
+  a.addEventListener('click', closeMenu);
 });
 
 // Scroll reveal
