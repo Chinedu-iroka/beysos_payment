@@ -40,8 +40,11 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .nav-cta:hover { background: var(--gold-light) !important; }
 .nav-cta::after { display: none !important; }
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+.nav-close { display: none; background: none; border: none; color: #00D4FF; font-size: 28px; cursor: pointer; padding: 4px; position: fixed; top: 20px; right: 24px; z-index: 1001; }
 .hamburger span { width: 24px; height: 1px; background: #00D4FF; display: block; }
 @media (max-width: 768px) {
+  .nav-close { display: none; }
+  .nav-close.open { display: block; }
   html, body { overflow-x: hidden; width: 100%; }
   .nav-logo { left: 16px; top: -5px; }
   .nav-logo img { height: 70px; }
@@ -250,6 +253,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <button class="hamburger" id="hamburger" aria-label="Toggle menu">
     <span></span><span></span><span></span>
   </button>
+  <button class="nav-close" id="navClose" aria-label="Close menu">✕</button>
 </nav>
 
 <!-- HERO -->
@@ -463,6 +467,13 @@ window.addEventListener('scroll', () => {
 // Mobile menu
 document.getElementById('hamburger').addEventListener('click', () => {
   document.getElementById('navLinks').classList.toggle('open');
+  document.getElementById('navClose').classList.toggle('open');
+  document.getElementById('hamburger').style.display = 'none';
+});
+document.getElementById('navClose').addEventListener('click', () => {
+  document.getElementById('navLinks').classList.remove('open');
+  document.getElementById('navClose').classList.remove('open');
+  document.getElementById('hamburger').style.display = 'flex';
 });
 document.querySelectorAll('.nav-links a').forEach(a => {
   a.addEventListener('click', () => document.getElementById('navLinks').classList.remove('open'));
