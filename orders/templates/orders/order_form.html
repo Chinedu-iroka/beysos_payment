@@ -9,7 +9,8 @@
 <script src="https://js.stripe.com/v3/"></script>
 <script src="{% static 'orders/js/cart.js' %}"></script>
 <style>
-  :root {
+  :root { box-sizing: border-box; } *, *::before, *::after { box-sizing: border-box; max-width: 100%; }
+:root {
     --ink: #1a0533;
     --cream: #ffffff;
     --gold: #00D4FF;
