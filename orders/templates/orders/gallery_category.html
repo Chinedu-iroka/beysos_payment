@@ -65,8 +65,8 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
   .nav-close.open { display: block; }
   .nav { padding: 14px 24px; }
   .nav.scrolled { padding: 10px 24px; }
-  .hamburger { display: flex; }
-  .nav-links { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
+  .hamburger { display: flex; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 8px; }
+  .nav-links { display: none; position: fixed; inset: 0; background: rgba(0,0,0,1); flex-direction: column; justify-content: center; align-items: center; gap: 32px; z-index: 999; overflow: hidden; }
   .nav-links.open { display: flex; }
   .nav-links a { font-size: 14px; }
 }
