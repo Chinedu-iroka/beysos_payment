@@ -42,7 +42,9 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
 .hamburger span { width: 24px; height: 1px; background: var(--cream); display: block; }
 @media (max-width: 768px) {
-  .nav { padding: 14px 24px; }
+  .nav-logo { left: 16px; top: -5px; }
+  .nav-logo img { height: 70px; }
+  .nav { padding: 14px 24px 14px 100px; }
   .nav.scrolled { padding: 10px 24px; }
   .hamburger { display: flex; }
   .nav-links { display: none; position: fixed; inset: 0; background: rgba(13,13,13,0.98); flex-direction: column; justify-content: center; align-items: center; gap: 32px; }
@@ -120,7 +122,9 @@ section { position: relative; z-index: 1; }
 /* ABOUT */
 .about { padding: 120px 0; }
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
-@media (max-width: 768px) { .about-grid { grid-template-columns: 1fr; gap: 48px; } }
+@media (max-width: 768px) {
+  .nav-logo { left: 16px; top: -5px; }
+  .nav-logo img { height: 70px; } .about-grid { grid-template-columns: 1fr; gap: 48px; } }
 .about-text p { font-size: 15px; color: #1A0A2E; line-height: 1.85; margin-top: 24px; }
 .about-images { position: relative; height: 500px; }
 .about-img-main { position: absolute; top: 0; left: 0; right: 60px; bottom: 60px; background-image: url('https://res.cloudinary.com/dvpzskh3t/image/upload/v1774606632/before_gv4lyp.jpg'); background-size: cover; background-position: center; border-radius: 2px; }
@@ -174,7 +178,9 @@ section { position: relative; z-index: 1; }
 /* CONTACT */
 .contact { padding: 100px 0; }
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
-@media (max-width: 768px) { .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
+@media (max-width: 768px) {
+  .nav-logo { left: 16px; top: -5px; }
+  .nav-logo img { height: 70px; } .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
 .contact p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-top: 20px; }
 .contact-detail { display: flex; align-items: flex-start; gap: 14px; margin-top: 28px; }
 .contact-detail-icon { width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 2px; display: flex; align-items: center; justify-content: center; font-size: 15px; flex-shrink: 0; background: rgba(201,168,76,0.06); }
