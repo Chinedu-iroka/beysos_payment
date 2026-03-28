@@ -40,9 +40,8 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .nav-cta:hover { background: var(--gold-light) !important; }
 .nav-cta::after { display: none !important; }
 .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
-.hamburger span { width: 24px; height: 1px; background: #00D4FF; display: block; }
+.hamburger span { width: 24px; height: 1px; background: var(--cream); display: block; }
 @media (max-width: 768px) {
-  html, body { overflow-x: hidden; width: 100%; }
   .nav-logo { left: 16px; top: -5px; }
   .nav-logo img { height: 70px; }
   .nav { padding: 14px 24px 14px 100px; }
@@ -124,7 +123,6 @@ section { position: relative; z-index: 1; }
 .about { padding: 120px 0; }
 .about-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
 @media (max-width: 768px) {
-  html, body { overflow-x: hidden; width: 100%; }
   .nav-logo { left: 16px; top: -5px; }
   .nav-logo img { height: 70px; } .about-grid { grid-template-columns: 1fr; gap: 48px; } }
 .about-text p { font-size: 15px; color: #1A0A2E; line-height: 1.85; margin-top: 24px; }
@@ -181,7 +179,6 @@ section { position: relative; z-index: 1; }
 .contact { padding: 100px 0; }
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
 @media (max-width: 768px) {
-  html, body { overflow-x: hidden; width: 100%; }
   .nav-logo { left: 16px; top: -5px; }
   .nav-logo img { height: 70px; } .contact-grid { grid-template-columns: 1fr; gap: 48px; } }
 .contact p { font-size: 14px; color: var(--muted); line-height: 1.8; margin-top: 20px; }
