@@ -62,7 +62,8 @@ class GalleryCategory(models.Model):
 
 class GalleryImage(models.Model):
     category   = models.ForeignKey(GalleryCategory, related_name='images', on_delete=models.CASCADE)
-    image      = models.ImageField(upload_to='gallery/%Y/%m/')
+    image      = models.ImageField(upload_to='gallery/%Y/%m/', blank=True, null=True)
+    video      = models.FileField(upload_to='gallery/videos/%Y/%m/', blank=True, null=True, help_text="Upload a video file (MP4 recommended)")
     title      = models.CharField(max_length=200, blank=True)
     price      = models.DecimalField(max_digits=8, decimal_places=2, default=25.00)  # ← add this
     is_cover   = models.BooleanField(default=False, help_text="Use this image as the category cover photo.")

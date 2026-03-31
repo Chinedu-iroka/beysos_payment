@@ -179,6 +179,29 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
   .lightbox-inner img { max-width: 95vw; }
 }
 
+.video-play-icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 56px;
+  height: 56px;
+  background: rgba(107,33,168,0.8);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 20px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.video-modal { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.92); display: none; align-items: center; justify-content: center; padding: 24px; }
+.video-modal.open { display: flex; }
+.video-modal-inner { position: relative; width: 100%; max-width: 900px; }
+.video-modal-close { position: absolute; top: -40px; right: 0; background: none; border: none; color: #fff; font-size: 32px; cursor: pointer; }
+
 /* CTA BANNER */
 .cta-banner { margin-top: 60px; padding: 56px 48px; background: rgba(211, 211, 211, 0.06); border: 1px solid var(--border); border-radius: 2px; text-align: center; }
 .cta-banner h3 { font-family: 'Cormorant Garamond', serif; font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 300; color: var(--ink); margin-bottom: 12px; }
@@ -253,17 +276,22 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     {% for img in images %}
     <div class="img-card" id="card-{{ img.id }}" data-id="{{ img.id }}">
 
-      <div class="img-card-photo" onclick="openLightbox({{ forloop.counter0 }})">
-        <img src="{{ img.image.url }}" alt="{{ img.title|default:category.name }}" loading="lazy"/>
+     <div class="img-card-photo" onclick="{% if img.video %}openVideo('{{ img.video.url }}'){% else %}openLightbox({{ forloop.counter0 }}){% endif %}">
+  {% if img.video %}
+    <video src="{{ img.video.url }}" style="width:100%;height:100%;object-fit:cover;" muted playsinline></video>
+    <div class="video-play-icon">▶</div>
+  {% else %}
+    <img src="{{ img.image.url }}" alt="{{ img.title|default:category.name }}"/>
+  {% endif %}
         <div class="img-price-tag">${{ img.price }}</div>
         <div class="zoom-hint"><span>View Full</span></div>
       </div>
 
       <div class="img-card-actions">
-  <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{{ img.image.url|escapejs }}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
+  <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{% if img.image %}{{ img.image.url|escapejs }}{% elif img.video %}{{ img.video.url|escapejs }}{% endif %}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
     ✦ Book Now
   </button>
-  <button class="btn-add-cart" id="cart-btn-{{ img.id }}" onclick="addToCart({{ img.id }}, '{{ img.image.url }}', '{{ img.title|default:category.name|escapejs }}', '{{ category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
+  <button class="btn-add-cart" id="cart-btn-{{ img.id }}" onclick="addToCart({{ img.id }}, '{% if img.image %}{{ img.image.url }}{% elif img.video %}{{ img.video.url }}{% endif %}', '{{ img.title|default:category.name|escapejs }}', '{{ category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
     + Add to Cart
   </button>
 </div>
@@ -371,7 +399,9 @@ document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
 // ── Image data from Django (for lightbox)
 const images = [
   {% for img in images %}
-  { id: {{ img.id }}, src: '{{ img.image.url }}', caption: '{{ img.title|default:category.name|escapejs }}', category: '{{ category.name|escapejs }}' },
+  {% if img.image or img.video %}
+  { id: {{ img.id }}, src: '{% if img.image %}{{ img.image.url|escapejs }}{% elif img.video %}{{ img.video.url|escapejs }}{% endif %}', caption: '{{ img.title|default:category.name|escapejs }}', category: '{{ category.name|escapejs }}' },
+  {% endif %}
   {% endfor %}
 ];
 
@@ -412,6 +442,18 @@ document.getElementById('lightbox').addEventListener('click', function(e) {
   if (e.target === this) closeLightbox();
 });
 
+function openVideo(url) {
+  document.getElementById('videoSource').src = url;
+  document.getElementById('videoPlayer').load();
+  document.getElementById('videoModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeVideo() {
+  document.getElementById('videoModal').classList.remove('open');
+  document.getElementById('videoPlayer').pause();
+  document.body.style.overflow = '';
+}
+
 document.addEventListener('keydown', e => {
   if (document.getElementById('lightbox').classList.contains('open')) {
     if (e.key === 'Escape')     closeLightbox();
@@ -422,5 +464,16 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeCart();
 });
 </script>
+
+<!-- VIDEO MODAL -->
+<div class="video-modal" id="videoModal" onclick="closeVideo()">
+  <div class="video-modal-inner" onclick="event.stopPropagation()">
+    <button class="video-modal-close" onclick="closeVideo()">×</button>
+    <video id="videoPlayer" controls autoplay style="width:100%;max-height:80vh;border-radius:4px;">
+      <source id="videoSource" src="" type="video/mp4"/>
+    </video>
+  </div>
+</div>
+
 </body>
 </html>
