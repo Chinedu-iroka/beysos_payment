@@ -45,12 +45,12 @@ class OrderPhotoAdmin(admin.ModelAdmin):
 class GalleryImageInline(admin.TabularInline):
     model  = GalleryImage
     extra  = 3
-    fields = ('image', 'video', 'title', 'price', 'is_cover', 'is_visible')
+    fields = ('image', 'video', 'title', 'price', 'shopify_link', 'etsy_link', 'is_cover', 'is_visible')
 
 @admin.register(GalleryCategory)
 class GalleryCategoryAdmin(admin.ModelAdmin):
-    list_display        = ('name', 'slug', 'order')
-    list_editable       = ('order',)
+    list_display        = ('name', 'slug', 'order', 'is_external')
+    list_editable       = ('order', 'is_external')
     prepopulated_fields = {'slug': ('name',)}
     inlines             = [GalleryImageInline]
 
@@ -60,6 +60,6 @@ class GalleryImageAdmin(admin.ModelAdmin):
     list_editable = ('price', 'is_cover', 'is_visible')
     list_filter   = ('category', 'is_visible')
     search_fields = ('title',)
-    fields        = ('category', 'image', 'video', 'title', 'price', 'is_cover', 'is_visible')
+    fields        = ('category', 'image', 'video', 'title', 'price', 'shopify_link', 'etsy_link', 'is_cover', 'is_visible')
     
       

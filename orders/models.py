@@ -50,6 +50,7 @@ class GalleryCategory(models.Model):
     slug        = models.SlugField(max_length=100, unique=True)
     description = models.TextField(blank=True)
     order       = models.PositiveIntegerField(default=0, help_text="Controls display order. Lower numbers appear first.")
+    is_external = models.BooleanField(default=False, help_text="If checked, images show Shopify/Etsy buttons instead of Book Now/Add to Cart")
 
     class Meta:
         ordering = ['order', 'name']
@@ -66,6 +67,8 @@ class GalleryImage(models.Model):
     video      = models.FileField(upload_to='gallery/videos/%Y/%m/', blank=True, null=True, help_text="Upload a video file (MP4 recommended)")
     title      = models.CharField(max_length=200, blank=True)
     price      = models.DecimalField(max_digits=8, decimal_places=2, default=25.00)  # ← add this
+    shopify_link = models.URLField(blank=True, null=True, help_text="Shopify product link for this image")
+    etsy_link    = models.URLField(blank=True, null=True, help_text="Etsy product link for this image")
     is_cover   = models.BooleanField(default=False, help_text="Use this image as the category cover photo.")
     is_visible = models.BooleanField(default=True, help_text="Uncheck to hide this image from the gallery.")
     uploaded   = models.DateTimeField(auto_now_add=True)
