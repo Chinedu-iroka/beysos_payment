@@ -111,7 +111,7 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 /* BUTTONS */
 .btn-gold { background: var(--gold); color: var(--ink); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
 .btn-gold:hover { background: var(--gold-light); transform: translateY(-2px); box-shadow: 0 12px 32px rgba(201,168,76,0.3); }
-.btn-outline { background: transparent; color: var(--cream); border: 1px solid rgba(245,240,232,0.35); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
+.btn-outline { background: transparent; color: var(--gold); border: 1px solid rgba(245,240,232,0.35); padding: 15px 36px; border-radius: 2px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; text-decoration: none; transition: all 0.3s; display: inline-flex; align-items: center; gap: 8px; }
 .btn-outline:hover { border-color: var(--gold); color: var(--gold); transform: translateY(-2px); }
 
 /* SECTIONS */
@@ -243,6 +243,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     <li><a href="#about">About</a></li>
     <li><a href="#how">How It Works</a></li>
     <li><a href="{% url 'gallery' %}">Gallery</a></li>
+    <li><a href="{% url 'prompts_store' %}">Prompts Shop</a></li>
     <li><a href="#contact">Contact</a></li>
     <li>
   <button class="nav-cart" onclick="toggleCart()" title="View cart">
@@ -267,7 +268,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     <p class="hero-sub">Transform ordinary photos into extraordinary, professional visuals using the power of advanced artificial intelligence.</p>
     <div class="hero-actions">
       <a href="{% url 'gallery' %}" class="btn-gold">View Gallery →</a>
-      {% comment %} <a href="{% url 'gallery' %}" class="btn-outline">View Gallery</a> {% endcomment %}
+      <a href="{% url 'prompts_store' %}" class="btn-outline">View Prompts Shop</a>
     </div>
   </div>
   {% comment %} <div class="hero-scroll"> {% endcomment %}
@@ -437,8 +438,8 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
             <input type="email" id="contactEmail" name="email" placeholder="you@example.com" required/>
           </div>
           <div class="form-field">
-            <label for="contactMsg">Message</label>
-            <textarea id="contactMsg" name="message" rows="5" placeholder="Tell us about your project..." required></textarea>
+            <label for="contactMsg">Message / Feedback</label>
+            <textarea id="contactMsg" name="message" rows="5" placeholder="Tell us about it..." required></textarea>
           </div>
           <div class="form-msg" id="formMsg"></div>
           <button type="submit" class="form-submit">Send Request →</button>

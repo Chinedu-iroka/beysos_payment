@@ -51,6 +51,8 @@ class GalleryCategory(models.Model):
     description = models.TextField(blank=True)
     order       = models.PositiveIntegerField(default=0, help_text="Controls display order. Lower numbers appear first.")
     is_external = models.BooleanField(default=False, help_text="If checked, images show Shopify/Etsy buttons instead of Book Now/Add to Cart")
+    is_bundle   = models.BooleanField(default=False, help_text="If checked, all images are sold as a bundle at one price")
+    bundle_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Price for the entire bundle")
 
     class Meta:
         ordering = ['order', 'name']
@@ -59,6 +61,12 @@ class GalleryCategory(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def bundle_price_cents(self):
+        if self.bundle_price:
+            return int(self.bundle_price * 100)
+        return 0
 
 
 class GalleryImage(models.Model):
@@ -90,3 +98,38 @@ class OrderCartItem(models.Model):
 
     def __str__(self):
         return f"{self.title} — {self.order.short_id}"
+
+
+
+class PromptCategory(models.Model):
+    name  = models.CharField(max_length=200)
+    slug  = models.SlugField(unique=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+        verbose_name_plural = 'Prompt Categories'
+
+    def __str__(self):
+        return self.name
+
+
+class Prompt(models.Model):
+    category      = models.ForeignKey(PromptCategory, on_delete=models.CASCADE, related_name='prompts')
+    title         = models.CharField(max_length=200)
+    description   = models.TextField(blank=True)
+    preview_image = models.ImageField(upload_to='prompts/%Y/%m/')
+    prompt_text   = models.TextField(help_text="The actual prompt text — sent to client after payment")
+    price         = models.DecimalField(max_digits=8, decimal_places=2)
+    is_visible    = models.BooleanField(default=True)
+    created_at    = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
+
+    @property
+    def price_cents(self):
+        return int(self.price * 100)

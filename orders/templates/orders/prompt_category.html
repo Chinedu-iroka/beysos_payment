@@ -1,0 +1,395 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>{{ category.name }} Prompts — Shots By Beysos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <script src="{% static 'orders/js/cart.js' %}"></script>
+  <style>
+    :root {
+      --ink:        #1a0533;
+      --cream:      #ffffff;
+      --gold:       #6B21A8;
+      --gold-light: #D946EF;
+      --muted:      #6B7280;
+      --border:     rgba(107,33,168,0.2);
+    }
+    *, *::before, *::after { box-sizing: border-box; max-width: 100%; }
+    html, body { overflow-x: hidden; width: 100%; }
+    body { background: #ffffff; color: #1a0533; font-family: 'DM Sans', sans-serif; font-weight: 300; margin: 0; }
+
+    .nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: #fff; text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
+    .nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: flex-end; padding: 22px 60px 22px 180px; transition: background 0.4s, padding 0.4s; }
+    .nav.scrolled { background: rgba(255,255,255,0.96); backdrop-filter: blur(16px); padding: 14px 60px 14px 180px; border-bottom: 1px solid var(--border); }
+    .nav-logo { position: absolute; top: -10px; left: 60px; z-index: 102; }
+    .nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin: 0; padding: 0; }
+    .nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #00D4FF; text-decoration: none; transition: color 0.3s; position: relative; }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+    .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-cta { background: var(--gold) !important; color: #fff !important; padding: 9px 22px; border-radius: 2px; font-weight: 500 !important; }
+    .nav-cta:hover { background: var(--gold-light) !important; }
+    .nav-cta::after { display: none !important; }
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; background: none; border: none; padding: 4px; }
+    .hamburger span { width: 24px; height: 1px; background: #00D4FF; display: block; }
+    .nav-close { display: none; background: none; border: none; color: #00D4FF; font-size: 28px; cursor: pointer; padding: 4px; position: fixed; top: 16px; right: 24px; z-index: 1001; }
+    .nav-close.open { display: block; }
+    .nav-cart { position: relative; cursor: pointer; background: none; border: 1px solid var(--border); border-radius: 2px; padding: 8px 14px; color: var(--muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.3s; display: flex; align-items: center; gap: 8px; }
+    .nav-cart:hover { color: var(--gold); }
+    .cart-badge { background: var(--gold); color: #fff; font-size: 9px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; position: absolute; top: -7px; right: -7px; }
+    .cart-badge.visible { display: flex; }
+
+    @media (max-width: 768px) {
+      html, body { overflow-x: hidden; width: 100%; }
+      .nav { padding: 14px 24px 14px 100px; }
+      .nav.scrolled { padding: 10px 24px 10px 100px; }
+      .nav-logo { left: 16px; top: -5px; }
+      .nav-logo img { height: 70px; }
+      .hamburger { display: flex; background: rgba(0,0,0,0.4); border-radius: 4px; padding: 8px; }
+      .nav-links { display: none; position: fixed; inset: 0; background: rgba(0,0,0,1); flex-direction: column; justify-content: center; align-items: center; gap: 32px; z-index: 999; overflow: hidden; }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 14px; }
+    }
+
+    /* CART */
+    .cart-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(13,13,13,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .cart-overlay.open { opacity: 1; pointer-events: all; }
+    .cart-drawer { position: fixed; top: 0; right: 0; bottom: 0; z-index: 301; width: 420px; max-width: 100vw; background: #111; border-left: 1px solid var(--border); display: flex; flex-direction: column; transform: translateX(100%); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+    .cart-drawer.open { transform: translateX(0); }
+    .cart-drawer-header { display: flex; align-items: center; justify-content: space-between; padding: 28px 28px 20px; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .cart-drawer-header h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.6rem; font-weight: 300; color: #fff; }
+    .cart-drawer-header h3 span { font-family: 'DM Sans', sans-serif; font-size: 12px; color: var(--muted); font-weight: 300; margin-left: 8px; }
+    .cart-close { background: none; border: none; color: var(--muted); font-size: 24px; cursor: pointer; }
+    .cart-items { flex: 1; overflow-y: auto; padding: 20px 28px; display: flex; flex-direction: column; gap: 14px; }
+    .cart-empty { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
+    .cart-empty .icon { font-size: 36px; margin-bottom: 12px; opacity: 0.4; }
+    .cart-drawer-footer { padding: 20px 28px 28px; border-top: 1px solid var(--border); flex-shrink: 0; }
+    .cart-summary { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+    .btn-proceed { width: 100%; padding: 15px; background: var(--gold); color: #fff; border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center; }
+    .btn-proceed:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-clear-cart { width: 100%; margin-top: 10px; padding: 10px; background: transparent; color: var(--muted); border: 1px solid var(--border); border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; cursor: pointer; }
+
+    /* PAGE */
+    .page-container { max-width: 1200px; margin: 0 auto; padding: 160px 40px 80px; }
+    .page-header { margin-bottom: 48px; }
+    .breadcrumb { font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 16px; }
+    .breadcrumb a { color: var(--gold); text-decoration: none; }
+    .breadcrumb a:hover { text-decoration: underline; }
+    .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 300; color: var(--ink); line-height: 1.1; margin-bottom: 12px; }
+    .page-count { font-size: 12px; color: var(--muted); }
+
+    /* CATEGORY TABS */
+    .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+    .cat-tab { padding: 8px 20px; border: 1px solid var(--border); border-radius: 2px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: all 0.3s; }
+    .cat-tab:hover, .cat-tab.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+
+    /* PROMPTS GRID */
+    .prompts-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 24px; }
+    .prompt-card { border: 1px solid var(--border); border-radius: 4px; overflow: hidden; transition: all 0.3s; background: #fff; }
+    .prompt-card:hover { border-color: var(--gold); box-shadow: 0 8px 32px rgba(107,33,168,0.1); transform: translateY(-2px); }
+    .prompt-card-image { position: relative; height: 220px; overflow: hidden; }
+    .prompt-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
+    .prompt-card:hover .prompt-card-image img { transform: scale(1.04); }
+    .prompt-price-tag { position: absolute; top: 12px; right: 12px; background: var(--gold); color: #fff; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 2px; }
+    .prompt-card-body { padding: 20px; }
+    .prompt-card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--ink); margin-bottom: 10px; line-height: 1.3; }
+    .prompt-card-desc { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    .prompt-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
+    .prompt-card-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--gold); font-weight: 400; }
+    .btn-buy-prompt { background: var(--gold); color: #fff; border: none; padding: 10px 20px; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .btn-buy-prompt:hover { background: var(--gold-light); transform: translateY(-1px); }
+
+    /* MODAL */
+    .modal-overlay { position: fixed; inset: 0; z-index: 600; background: rgba(0,0,0,0.85); display: none; align-items: center; justify-content: center; padding: 24px; backdrop-filter: blur(8px); }
+    .modal-overlay.open { display: flex; }
+    .modal { background: #fff; border-radius: 4px; width: 100%; max-width: 480px; padding: 40px; position: relative; }
+    .modal-close { position: absolute; top: 16px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer; color: var(--muted); }
+    .modal-title { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; font-weight: 300; color: var(--ink); margin-bottom: 6px; }
+    .modal-subtitle { font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+    .modal-price { font-family: 'Cormorant Garamond', serif; font-size: 2rem; color: var(--gold); margin-bottom: 24px; }
+    .modal-field { margin-bottom: 16px; }
+    .modal-field label { display: block; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .modal-field input { width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 14px; color: var(--ink); outline: none; transition: border-color 0.3s; }
+    .modal-field input:focus { border-color: var(--gold); }
+    .stripe-field { border: 1px solid var(--border); border-radius: 2px; padding: 12px 14px; margin-bottom: 20px; transition: border-color 0.3s; }
+    .stripe-field.focused { border-color: var(--gold); }
+    .btn-pay-prompt { width: 100%; padding: 16px; background: var(--gold); color: #fff; border: none; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .btn-pay-prompt:hover { background: var(--gold-light); }
+    .btn-pay-prompt:disabled { opacity: 0.5; cursor: not-allowed; }
+    .modal-error { color: #e87c6e; font-size: 12px; margin-bottom: 12px; display: none; }
+    .modal-success { text-align: center; display: none; padding: 20px 0; }
+    .modal-success .success-icon { font-size: 48px; margin-bottom: 16px; }
+    .modal-success h3 { font-family: 'Cormorant Garamond', serif; font-size: 1.8rem; color: var(--ink); margin-bottom: 10px; }
+    .modal-success p { font-size: 13px; color: var(--muted); line-height: 1.8; }
+    .secure-note { font-size: 10px; color: var(--muted); text-align: center; margin-top: 12px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+
+    .empty-state { text-align: center; padding: 80px 20px; border: 1px dashed var(--border); border-radius: 4px; color: var(--muted); }
+
+    @media (max-width: 768px) {
+      .page-container { padding: 140px 20px 60px; }
+      .prompts-grid { grid-template-columns: 1fr 1fr; gap: 16px; }
+    }
+    @media (max-width: 520px) {
+      .prompts-grid { grid-template-columns: 1fr; }
+      .modal { padding: 28px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="nav-promo">✦ Book Your Session Today &amp; Receive Your Transformed Photo in 24–48 Hours ✦</div>
+
+<nav class="nav" id="navbar">
+  <a href="{% url 'home' %}" class="nav-logo">
+    <img src="https://assets.zyrosite.com/cdn-cgi/image/format=auto,w=768,fit=crop,q=95/Vk75LpTKjSjaGtev/untitled-design-2-bqV3e3351SqyseYc.png" alt="Shots By Beysos"/>
+  </a>
+  <ul class="nav-links" id="navLinks">
+    <li><a href="{% url 'home' %}">Home</a></li>
+    <li><a href="{% url 'gallery' %}">Gallery</a></li>
+    <li><a href="{% url 'prompts_store' %}">Prompts Shop</a></li>
+    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+    <li>
+      <button class="nav-cart" onclick="toggleCart()" title="View cart">
+        🛒 Cart
+        <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+    </li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <button class="nav-close" id="navClose" aria-label="Close menu">✕</button>
+</nav>
+
+<div class="page-container">
+  <div class="page-header">
+    <div class="breadcrumb">
+      <a href="{% url 'prompts_store' %}">Prompts Store</a> &nbsp;/&nbsp; {{ category.name }}
+    </div>
+    <h1 class="page-title">{{ category.name }}</h1>
+    <div class="page-count">{{ prompts.count }} prompt{{ prompts.count|pluralize }} available</div>
+  </div>
+
+  <!-- Category Tabs -->
+  <div class="category-tabs">
+    <a href="{% url 'prompts_store' %}" class="cat-tab">All Prompts</a>
+    {% for cat in categories %}
+      <a href="{% url 'prompt_category' cat.slug %}" class="cat-tab {% if cat.slug == category.slug %}active{% endif %}">{{ cat.name }}</a>
+    {% endfor %}
+  </div>
+
+  <!-- Prompts Grid -->
+  {% if prompts %}
+  <div class="prompts-grid">
+    {% for prompt in prompts %}
+    <div class="prompt-card">
+      <div class="prompt-card-image">
+        {% if prompt.preview_image %}
+          <img src="{{ prompt.preview_image.url }}" alt="{{ prompt.title }}"/>
+        {% endif %}
+        <div class="prompt-price-tag">${{ prompt.price }}</div>
+      </div>
+      <div class="prompt-card-body">
+        <div class="prompt-card-title">{{ prompt.title }}</div>
+        <div class="prompt-card-desc">{{ prompt.description }}</div>
+        <div class="prompt-card-footer">
+          <div class="prompt-card-price">${{ prompt.price }}</div>
+          <button class="btn-buy-prompt" onclick="openPurchaseModal({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }})">
+            ✦ Buy Prompt
+          </button>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="empty-state">
+    <p style="font-size:14px;">No prompts in this category yet. Check back soon!</p>
+  </div>
+  {% endif %}
+</div>
+
+<!-- PURCHASE MODAL -->
+<div class="modal-overlay" id="purchaseModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="modalForm">
+      <div class="modal-title" id="modalPromptTitle">Buy Prompt</div>
+      <div class="modal-subtitle">Enter your details and complete payment. The prompt will be sent to your email.</div>
+      <div class="modal-price" id="modalPromptPrice">$0.00</div>
+      <div class="modal-field">
+        <label>Full Name</label>
+        <input type="text" id="promptBuyerName" placeholder="e.g. Amara Johnson"/>
+      </div>
+      <div class="modal-field">
+        <label>Email Address</label>
+        <input type="email" id="promptBuyerEmail" placeholder="you@example.com"/>
+      </div>
+      <div class="modal-field">
+        <label>Card Details</label>
+        <div class="stripe-field" id="promptCardElement"></div>
+      </div>
+      <div class="modal-error" id="modalError"></div>
+      <button class="btn-pay-prompt" id="payPromptBtn" onclick="handlePromptPayment()">
+        🔒 Pay & Get Prompt
+      </button>
+      <div class="secure-note">
+        <svg width="10" height="12" viewBox="0 0 12 14" fill="none"><path d="M6 0L0 2.5V7C0 10.3 2.6 13.4 6 14C9.4 13.4 12 10.3 12 7V2.5L6 0Z" fill="currentColor"/></svg>
+        Secured by Stripe · 256-bit SSL
+      </div>
+    </div>
+    <div class="modal-success" id="modalSuccess">
+      <div class="success-icon">✓</div>
+      <h3>Payment Successful!</h3>
+      <p>Your prompt has been sent to <strong id="successEmail"></strong>.<br/>Check your inbox — it should arrive within a few minutes.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CART -->
+<div class="cart-overlay" id="cartOverlay" onclick="closeCart()"></div>
+<div class="cart-drawer" id="cartDrawer">
+  <div class="cart-drawer-header">
+    <h3>Your Cart <span id="cartCountLabel">0 items</span></h3>
+    <button class="cart-close" onclick="closeCart()">×</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    <div class="cart-empty">
+      <div class="icon">🛒</div>
+      <p>Your cart is empty.</p>
+    </div>
+  </div>
+  <div class="cart-drawer-footer">
+    <div class="cart-summary"><span>Selected images</span><span id="cartFooterCount">0 images</span></div>
+    <div class="cart-summary" style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px;">
+      <span style="color:#fff;font-size:13px;">Total</span>
+      <span id="cartTotal" style="color:var(--gold);font-size:16px;font-weight:500;">$0.00</span>
+    </div>
+    <button class="btn-proceed" id="proceedBtn" onclick="proceedToBook('{% url 'order_form' %}')" disabled>Proceed to Book →</button>
+    <button class="btn-clear-cart" onclick="cartEmpty()">Clear Cart</button>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+const navbar = document.getElementById('navbar');
+window.addEventListener('scroll', () => {
+  navbar.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+function openMenu() {
+  document.getElementById('navLinks').classList.add('open');
+  document.getElementById('navClose').classList.add('open');
+  document.getElementById('hamburger').style.visibility = 'hidden';
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.width = '100%';
+}
+function closeMenu() {
+  document.getElementById('navLinks').classList.remove('open');
+  document.getElementById('navClose').classList.remove('open');
+  document.getElementById('hamburger').style.visibility = 'visible';
+  document.body.style.overflow = '';
+  document.body.style.position = '';
+  document.body.style.width = '';
+}
+document.getElementById('hamburger').addEventListener('click', openMenu);
+document.getElementById('navClose').addEventListener('click', closeMenu);
+document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', closeMenu));
+
+const STRIPE_KEY = '{{ stripe_publishable_key }}';
+const BUY_PROMPT_URL = '{% url "buy_prompt" %}';
+const CSRF_TOKEN = '{{ csrf_token }}';
+
+let currentPromptId = null;
+let currentPromptPrice = 0;
+let stripeInstance, promptCardElement;
+
+function openPurchaseModal(promptId, title, price, priceCents) {
+  currentPromptId    = promptId;
+  currentPromptPrice = priceCents;
+  document.getElementById('modalPromptTitle').textContent = title;
+  document.getElementById('modalPromptPrice').textContent = '$' + price;
+  document.getElementById('modalForm').style.display = 'block';
+  document.getElementById('modalSuccess').style.display = 'none';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('purchaseModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (!stripeInstance) {
+    stripeInstance = Stripe(STRIPE_KEY);
+    const elements = stripeInstance.elements();
+    promptCardElement = elements.create('card', {
+      style: {
+        base: { fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#1a0533', '::placeholder': { color: 'rgba(107,33,168,0.4)' } },
+        invalid: { color: '#e87c6e' }
+      }
+    });
+    promptCardElement.mount('#promptCardElement');
+    promptCardElement.on('focus', () => document.getElementById('promptCardElement').classList.add('focused'));
+    promptCardElement.on('blur',  () => document.getElementById('promptCardElement').classList.remove('focused'));
+  }
+}
+
+function closeModal() {
+  document.getElementById('purchaseModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function showModalError(msg) {
+  const el = document.getElementById('modalError');
+  el.textContent = msg;
+  el.style.display = 'block';
+}
+
+async function handlePromptPayment() {
+  const name  = document.getElementById('promptBuyerName').value.trim();
+  const email = document.getElementById('promptBuyerEmail').value.trim();
+  if (!name)  return showModalError('Please enter your full name.');
+  if (!email || !/\S+@\S+\.\S+/.test(email)) return showModalError('Please enter a valid email address.');
+
+  const btn = document.getElementById('payPromptBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  document.getElementById('modalError').style.display = 'none';
+
+  try {
+    const intentRes = await fetch(BUY_PROMPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+      body: JSON.stringify({ prompt_id: currentPromptId, client_name: name, client_email: email })
+    });
+    const intentData = await intentRes.json();
+    if (intentData.error) throw new Error(intentData.error);
+
+    const { paymentIntent, error } = await stripeInstance.confirmCardPayment(intentData.clientSecret, {
+      payment_method: { card: promptCardElement, billing_details: { name, email } }
+    });
+
+    if (error) throw new Error(error.message);
+    if (paymentIntent.status === 'succeeded') {
+      document.getElementById('modalForm').style.display = 'none';
+      document.getElementById('successEmail').textContent = email;
+      document.getElementById('modalSuccess').style.display = 'block';
+    }
+  } catch (err) {
+    showModalError(err.message || 'Payment failed. Please try again.');
+    btn.disabled = false;
+    btn.textContent = '🔒 Pay & Get Prompt';
+  }
+}
+
+document.getElementById('purchaseModal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeCart(); }
+});
+</script>
+</body>
+</html>

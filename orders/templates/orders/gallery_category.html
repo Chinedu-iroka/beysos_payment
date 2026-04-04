@@ -112,6 +112,15 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .img-card-photo:hover .zoom-hint { opacity: 1; }
 .zoom-hint span { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--cream); border: 1px solid rgba(245,240,232,0.4); padding: 8px 16px; border-radius: 2px; backdrop-filter: blur(4px); }
 
+/* Bundle css */
+.bundle-actions { margin-top: 40px; padding: 32px; border: 1px solid var(--border); border-radius: 4px; background: rgba(107,33,168,0.05); text-align: center; }
+.bundle-price-display { margin-bottom: 24px; }
+.bundle-label { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 8px; }
+.bundle-amount { font-family: 'Cormorant Garamond', serif; font-size: 3rem; color: var(--gold); font-weight: 300; }
+.bundle-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; max-width: 500px; margin: 0 auto; }
+.bundle-btn { padding: 16px 24px; font-family: 'DM Sans', sans-serif; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; cursor: pointer; border: none; transition: all 0.25s; border-radius: 2px; }
+@media (max-width: 600px) { .bundle-buttons { grid-template-columns: 1fr; } }
+
 /* In-cart indicator */
 .img-card.in-cart { border-color: var(--gold); }
 .img-card.in-cart .img-card-photo::after { content: '✓ In Cart'; position: absolute; top: 12px; right: 12px; background: var(--gold); color: var(--ink); font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 600; padding: 4px 10px; border-radius: 2px; }
@@ -121,7 +130,7 @@ body { background: #ffffff; color: #1a0533; overflow-x: hidden; font-family: 'DM
 .img-card-actions button, .img-card-actions a { padding: 12px 8px; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500; cursor: pointer; border: none; transition: all 0.25s; line-height: 1; display: flex; align-items: center; justify-content: center; gap: 6px; text-decoration: none; }
 .btn-book-now { background: var(--gold); color: var(--ink); }
 .btn-book-now:hover { background: var(--gold-light); }
-.btn-add-cart { background: rgba(255,255,255,0.04); color: var(--muted); }
+.btn-add-cart { background: rgba(255,255,255,0.04); color: var(--gold-light); }
 .btn-add-cart:hover { background: rgba(201,168,76,0.1); color: var(--gold); }
 .btn-add-cart.added { background: rgba(201,168,76,0.12); color: var(--gold); }
 
@@ -237,6 +246,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   <ul class="nav-links" id="navLinks">
     <li><a href="{% url 'home' %}">Home</a></li>
     <li><a href="{% url 'gallery' %}" class="active">Gallery</a></li>
+    <li><a href="{% url 'prompts_store' %}">Prompts Shop</a></li>
     <li><a href="{% url 'home' %}#about">About</a></li>
     <li><a href="{% url 'home' %}#contact">Contact</a></li>
     <li>
@@ -283,7 +293,9 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   {% else %}
     <img src="{{ img.image.url }}" alt="{{ img.title|default:category.name }}"/>
   {% endif %}
-        <div class="img-price-tag">${{ img.price }}</div>
+        {% if not category.is_bundle %}
+<div class="img-price-tag">${{ img.price }}</div>
+{% endif %}
         <div class="zoom-hint"><span>View Full</span></div>
       </div>
 
@@ -295,6 +307,8 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
     {% if img.etsy_link %}
       <a href="{{ img.etsy_link }}" target="_blank" rel="noopener noreferrer" class="btn-add-cart" style="text-decoration:none;text-align:center;display:flex;align-items:center;justify-content:center;width:100%;box-sizing:border-box;">🧡 Buy on Etsy</a>
     {% endif %}
+  {% elif category.is_bundle %}
+    {# No per-image buttons for bundles #}
   {% else %}
     <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{% if img.image %}{{ img.image.url|escapejs }}{% elif img.video %}{{ img.video.url|escapejs }}{% endif %}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
       ✦ Book Now
@@ -307,7 +321,24 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
 
     </div>
     {% endfor %}
+</div><!-- /masonry grid -->
+
+{% if category.is_bundle %}
+<div class="bundle-actions">
+  <div class="bundle-price-display">
+    <span class="bundle-label">Bundle Price</span>
+    <span class="bundle-amount">${{ category.bundle_price }}</span>
   </div>
+  <div class="bundle-buttons">
+    <button class="btn-book-now bundle-btn" onclick="bookBundleNow('{% url 'order_form' %}', '{{ category.name|escapejs }}', {{ category.bundle_price_cents }}, {{ images|length }}, '{% if category.cover_image and category.cover_image.image %}{{ category.cover_image.image.url|escapejs }}{% elif images.0.image %}{{ images.0.image.url|escapejs }}{% elif images.0.video %}{{ images.0.video.url|escapejs }}{% endif %}')">
+      ✦ Book Bundle Now
+    </button>
+   <button class="btn-add-cart bundle-btn" id="bundle-cart-btn-{{ category.id }}" onclick="addBundleToCart('{{ category.id }}', '{{ category.name|escapejs }}', '{% if category.cover_image and category.cover_image.image %}{{ category.cover_image.image.url|escapejs }}{% elif images.0.image %}{{ images.0.image.url|escapejs }}{% elif images.0.video %}{{ images.0.video.url|escapejs }}{% endif %}', '{{ category.bundle_price }}', {{ category.bundle_price_cents }})">
+  + Add Bundle to Cart
+</button>
+  </div>
+</div>
+{% endif %}
 
   {% else %}
   <div class="empty-state">
@@ -472,6 +503,46 @@ document.addEventListener('keydown', e => {
   }
   if (e.key === 'Escape') closeCart();
 });
+
+// Bundle Function
+function bookBundleNow(orderUrl, categoryName, priceCents, imageCount, coverSrc) {
+  cartEmpty();
+  // Add bundle as a single cart item
+  cartAdd({
+    id: 'bundle-' + categoryName.replace(/\s+/g, '-').toLowerCase(),
+    src: coverSrc,
+    title: categoryName + ' Bundle',
+    category: categoryName,
+    price: (priceCents / 100).toFixed(2),
+    price_cents: priceCents
+  });
+  window.location.href = orderUrl +
+    '?style=' + encodeURIComponent(categoryName) +
+    '&notes=' + encodeURIComponent('Bundle: ' + categoryName) +
+    '&count=' + imageCount +
+    '&amount=' + priceCents +
+    '&cart=' + encodeURIComponent(JSON.stringify(cartLoad()));
+}
+
+function addBundleToCart(categoryId, categoryName, coverSrc, price, priceCents) {
+  const bundleId = 'bundle-' + categoryId;
+  const btn = document.getElementById('bundle-cart-btn-' + categoryId);
+  if (isInCart(bundleId)) {
+    cartRemove(bundleId);
+    if (btn) { btn.textContent = '+ Add Bundle to Cart'; btn.classList.remove('added'); }
+    return;
+  }
+  cartAdd({
+    id: bundleId,
+    src: coverSrc,
+    title: categoryName + ' Bundle',
+    category: categoryName,
+    price: price,
+    price_cents: priceCents
+  });
+  if (btn) { btn.textContent = '✓ Bundle In Cart'; btn.classList.add('added'); }
+  cartRenderAll();
+}
 </script>
 
 <!-- VIDEO MODAL -->

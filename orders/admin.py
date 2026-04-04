@@ -1,6 +1,6 @@
 import json
 from django.contrib import admin
-from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem
+from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem, PromptCategory, Prompt
 
 class OrderPhotoInline(admin.TabularInline):
     model               = OrderPhoto
@@ -49,8 +49,8 @@ class GalleryImageInline(admin.TabularInline):
 
 @admin.register(GalleryCategory)
 class GalleryCategoryAdmin(admin.ModelAdmin):
-    list_display        = ('name', 'slug', 'order', 'is_external')
-    list_editable       = ('order', 'is_external')
+    list_display        = ('name', 'slug', 'order', 'is_external', 'is_bundle', 'bundle_price')
+    list_editable       = ('order', 'is_external', 'is_bundle', 'bundle_price')
     prepopulated_fields = {'slug': ('name',)}
     inlines             = [GalleryImageInline]
 
@@ -63,3 +63,22 @@ class GalleryImageAdmin(admin.ModelAdmin):
     fields        = ('category', 'image', 'video', 'title', 'price', 'shopify_link', 'etsy_link', 'is_cover', 'is_visible')
     
       
+
+class PromptInline(admin.TabularInline):
+    model  = Prompt
+    extra  = 1
+    fields = ('title', 'preview_image', 'price', 'is_visible')
+
+@admin.register(PromptCategory)
+class PromptCategoryAdmin(admin.ModelAdmin):
+    list_display        = ('name', 'slug', 'order')
+    list_editable       = ('order',)
+    prepopulated_fields = {'slug': ('name',)}
+    inlines             = [PromptInline]
+
+@admin.register(Prompt)
+class PromptAdmin(admin.ModelAdmin):
+    list_display  = ('title', 'category', 'price', 'is_visible', 'created_at')
+    list_filter   = ('category', 'is_visible')
+    search_fields = ('title',)
+    list_editable = ('price', 'is_visible')

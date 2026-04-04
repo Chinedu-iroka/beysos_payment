@@ -22,7 +22,7 @@ function cartAdd(item) {
 }
 
 function cartRemove(id) {
-  cartSave(cartLoad().filter(function(i) { return i.id !== id; }));
+  cartSave(cartLoad().filter(function(i) { return String(i.id) !== String(id); }));
   var btn  = document.getElementById('cart-btn-' + id);
   var card = document.getElementById('card-' + id);
   if (btn)  { btn.textContent = '+ Add to Cart'; btn.classList.remove('added'); }
@@ -86,13 +86,18 @@ function cartRenderAll() {
     var el = document.createElement('div');
     el.className = 'cart-item';
     el.innerHTML =
-      '<img class="cart-item-img" src="' + item.src + '" alt="' + item.title + '"/>' +
+      (item.src && (item.src.endsWith('.mp4') || item.src.endsWith('.webm') || item.src.endsWith('.mov'))
+  ? '<div class="cart-item-img" style="background:#1a0533;display:flex;align-items:center;justify-content:center;font-size:24px;">🎬</div>'
+  : item.src
+    ? '<img class="cart-item-img" src="' + item.src + '" alt="' + item.title + '"/>'
+    : '<div class="cart-item-img" style="background:#1a0533;display:flex;align-items:center;justify-content:center;font-size:24px;">🖼️</div>'
+) +
       '<div class="cart-item-info">' +
         '<div class="cat">' + item.category + '</div>' +
         '<div class="title">' + item.title + '</div>' +
         '<div class="item-price">$' + parseFloat(item.price).toFixed(2) + '</div>' +
       '</div>' +
-      '<button class="cart-item-remove" onclick="cartRemove(' + item.id + ')" title="Remove">&times;</button>';
+     '<button class="cart-item-remove" onclick="cartRemove(\'' + item.id + '\')" title="Remove">&times;</button>';
     itemsEl.appendChild(el);
   });
 }

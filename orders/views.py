@@ -168,6 +168,50 @@ def save_order(request):
         return JsonResponse({'error': 'Could not save order. Please contact support.'}, status=500)
 
 
+def prompts_store(request):
+    from .models import PromptCategory
+    categories = PromptCategory.objects.prefetch_related('prompts').all()
+    return render(request, 'orders/prompts_store.html', {
+        'categories': categories,
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
+    })
+
+def prompt_category(request, slug):
+    from .models import PromptCategory
+    from django.shortcuts import get_object_or_404
+    category   = get_object_or_404(PromptCategory, slug=slug)
+    categories = PromptCategory.objects.all()
+    prompts    = category.prompts.filter(is_visible=True)
+    return render(request, 'orders/prompt_category.html', {
+        'category': category, 'categories': categories, 'prompts': prompts,
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
+    })
+
+@require_POST
+def buy_prompt(request):
+    try:
+        data       = json.loads(request.body)
+        prompt_id  = data.get('prompt_id')
+        from .models import Prompt
+        prompt     = Prompt.objects.get(id=prompt_id)
+        intent = stripe.PaymentIntent.create(
+            amount   = prompt.price_cents,
+            currency = settings.CURRENCY,
+            metadata = {
+                'type':          'prompt',
+                'prompt_id':     prompt_id,
+                'prompt_title':  prompt.title,
+                'client_email':  data.get('client_email', ''),
+                'client_name':   data.get('client_name', ''),
+            },
+            automatic_payment_methods={'enabled': True},
+        )
+        return JsonResponse({'clientSecret': intent.client_secret})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+
 @csrf_exempt
 @require_POST
 def stripe_webhook(request):
@@ -183,6 +227,24 @@ def stripe_webhook(request):
 
 
 def _handle_payment_succeeded(intent):
+    # Handle prompt purchase
+    if intent.get('metadata', {}).get('type') == 'prompt':
+        try:
+            from .models import Prompt
+            prompt       = Prompt.objects.get(id=intent['metadata']['prompt_id'])
+            client_email = intent['metadata'].get('client_email', '')
+            client_name  = intent['metadata'].get('client_name', '')
+            if client_email:
+                threading.Thread(
+                    target=_send_prompt_email,
+                    args=(prompt, client_name, client_email),
+                    daemon=True
+                ).start()
+        except Exception as e:
+            logger.error(f"Prompt payment handling failed: {e}")
+        return
+
+    # Handle regular order
     try:
         order = Order.objects.get(stripe_payment_id=intent['id'])
         if order.status == 'pending':
@@ -190,6 +252,26 @@ def _handle_payment_succeeded(intent):
             order.save()
     except Order.DoesNotExist:
         pass
+
+
+def _send_prompt_email(prompt, client_name, client_email):
+    try:
+        send_mail(
+            subject=f"Your Prompt — {prompt.title}",
+            message=f"Hi {client_name},\n\nThank you for your purchase!\n\nHere is your prompt:\n\n---\n{prompt.prompt_text}\n---\n\nFeel free to use this prompt in your AI image generation tool.\n\nWarm regards,\nShots By Beysos",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[client_email],
+            fail_silently=True,
+        )
+        send_mail(
+            subject=f"Prompt Sold — {prompt.title}",
+            message=f"A prompt was purchased.\n\nPrompt: {prompt.title}\nClient: {client_name}\nEmail: {client_email}\nAmount: ${prompt.price}",
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[settings.STUDIO_EMAIL],
+            fail_silently=True,
+        )
+    except Exception as e:
+        logger.error(f"Prompt email failed: {e}")
 
 
 def _send_client_confirmation(order):
