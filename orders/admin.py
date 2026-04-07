@@ -1,6 +1,6 @@
 import json
 from django.contrib import admin
-from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem, PromptCategory, Prompt
+from .models import Order, OrderPhoto, GalleryCategory, GalleryImage, OrderCartItem, PromptCategory, Prompt, PromptOrder
 
 class OrderPhotoInline(admin.TabularInline):
     model               = OrderPhoto
@@ -82,3 +82,11 @@ class PromptAdmin(admin.ModelAdmin):
     list_filter   = ('category', 'is_visible')
     search_fields = ('title',)
     list_editable = ('price', 'is_visible')
+
+
+@admin.register(PromptOrder)
+class PromptOrderAdmin(admin.ModelAdmin):
+    list_display  = ('short_id', 'client_name', 'client_email', 'prompt', 'amount_paid', 'status', 'created_at')
+    list_filter   = ('status',)
+    search_fields = ('client_name', 'client_email', 'stripe_payment_id')
+    readonly_fields = ('id', 'created_at', 'stripe_payment_id')

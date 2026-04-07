@@ -28,7 +28,7 @@
 
     /* NAVBAR */
     .nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: flex-end; padding: 22px 60px 22px 180px; transition: background 0.4s, padding 0.4s; }
-    .nav.scrolled { background: rgba(255,255,255,0.96); backdrop-filter: blur(16px); padding: 14px 60px 14px 180px; border-bottom: 1px solid var(--border); }
+    .nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
     .nav-logo { position: absolute; top: -10px; left: 60px; z-index: 102; }
     .nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); }
     .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin: 0; padding: 0; }
@@ -213,11 +213,16 @@
               <div class="prompt-card-title">{{ prompt.title }}</div>
               <div class="prompt-card-desc">{{ prompt.description }}</div>
               <div class="prompt-card-footer">
-                <div class="prompt-card-price">${{ prompt.price }}</div>
-                <button class="btn-buy-prompt" onclick="openPurchaseModal({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }})">
-                  ✦ Buy Prompt
-                </button>
-              </div>
+  <div class="prompt-card-price">${{ prompt.price }}</div>
+  <div style="display:flex;gap:8px;">
+    <button class="btn-buy-prompt" onclick="openPurchaseModal({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }})">
+      ✦ Buy Now
+    </button>
+    <button class="btn-buy-prompt" id="prompt-cart-btn-{{ prompt.id }}" style="background:transparent;border:1px solid var(--gold);color:var(--gold);" onclick="addPromptToCart({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }}, '{% if prompt.preview_image %}{{ prompt.preview_image.url|escapejs }}{% endif %}')">
+      + Cart
+    </button>
+  </div>
+</div>
             </div>
           </div>
           {% endif %}
@@ -320,6 +325,29 @@ document.getElementById('hamburger').addEventListener('click', openMenu);
 document.getElementById('navClose').addEventListener('click', closeMenu);
 document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', closeMenu));
 
+function addPromptToCart(promptId, title, price, priceCents, src) {
+  const cartId = 'prompt-' + promptId;
+  const btn = document.getElementById('prompt-cart-btn-' + promptId);
+  if (isInCart(cartId)) {
+    cartRemove(cartId);
+    if (btn) { btn.textContent = '+ Cart'; btn.style.background = 'transparent'; btn.style.color = 'var(--gold)'; }
+    return;
+  }
+  cartAdd({
+    id: cartId,
+    src: src,
+    title: title,
+    category: 'Prompt',
+    price: price,
+    price_cents: priceCents,
+    type: 'prompt',
+    prompt_id: promptId
+  });
+  if (btn) { btn.textContent = '✓ In Cart'; btn.style.background = 'var(--gold)'; btn.style.color = '#fff'; }
+  cartRenderAll();
+}
+
+
 // Prompt purchase
 const STRIPE_KEY = '{{ stripe_publishable_key }}';
 const BUY_PROMPT_URL = '{% url "buy_prompt" %}';
@@ -337,6 +365,15 @@ function openPurchaseModal(promptId, title, price, priceCents) {
   document.getElementById('modalForm').style.display = 'block';
   document.getElementById('modalSuccess').style.display = 'none';
   document.getElementById('modalError').style.display = 'none';
+  document.getElementById('promptBuyerName').value = '';
+  document.getElementById('promptBuyerEmail').value = '';
+  const btn = document.getElementById('payPromptBtn');
+  btn.disabled = false;
+  btn.textContent = '🔒 Pay & Get Prompt';
+  // Reset Stripe card element
+  if (promptCardElement) {
+    promptCardElement.clear();
+  }
   document.getElementById('purchaseModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -392,6 +429,17 @@ async function handlePromptPayment() {
 
     if (error) throw new Error(error.message);
     if (paymentIntent.status === 'succeeded') {
+      // Notify backend to send prompt email
+      await fetch('/api/send-prompt-email/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({
+          prompt_id:    currentPromptId,
+          client_name:  name,
+          client_email: email,
+          payment_id:   paymentIntent.id,
+        })
+      });
       document.getElementById('modalForm').style.display = 'none';
       document.getElementById('successEmail').textContent = email;
       document.getElementById('modalSuccess').style.display = 'block';
@@ -403,9 +451,9 @@ async function handlePromptPayment() {
   }
 }
 
-document.getElementById('purchaseModal').addEventListener('click', function(e) {
+{% comment %} document.getElementById('purchaseModal').addEventListener('click', function(e) {
   if (e.target === this) closeModal();
-});
+}); {% endcomment %}
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeCart(); }

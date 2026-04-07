@@ -133,3 +133,24 @@ class Prompt(models.Model):
     @property
     def price_cents(self):
         return int(self.price * 100)
+
+
+
+
+class PromptOrder(models.Model):
+    id           = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    prompt       = models.ForeignKey(Prompt, on_delete=models.SET_NULL, null=True, related_name='orders')
+    client_name  = models.CharField(max_length=200)
+    client_email = models.EmailField()
+    amount_paid  = models.DecimalField(max_digits=10, decimal_places=2)
+    currency     = models.CharField(max_length=10, default='usd')
+    stripe_payment_id = models.CharField(max_length=200, unique=True)
+    status       = models.CharField(max_length=20, default='paid')
+    created_at   = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def short_id(self):
+        return str(self.id).upper()[:8]
+
+    def __str__(self):
+        return f"Prompt Order {self.short_id} — {self.client_name}"

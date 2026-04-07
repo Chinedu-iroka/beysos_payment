@@ -130,7 +130,7 @@ def save_order(request):
         photo_count    = len(request.FILES.getlist('photos'))
         cart_json      = request.POST.get('cart_items', '[]')
         cart_items_list = json.loads(cart_json) if cart_json else []
-        cart_count     = len(cart_items_list)
+        cart_count     = len([i for i in cart_items_list if i.get('type') != 'prompt'])
         stripe_amount = request.POST.get('amount_paid')
         if stripe_amount:
             amount = int(stripe_amount) / 100
@@ -146,10 +146,13 @@ def save_order(request):
             OrderPhoto.objects.create(order=order, photo=photo_file, filename=photo_file.name)
 
         for item in cart_items_list:
+            # Skip prompt items — they are handled separately via email
+            if item.get('type') == 'prompt':
+                continue
             gallery_image = None
             try:
                 gallery_image = GalleryImage.objects.get(id=item.get('id'))
-            except GalleryImage.DoesNotExist:
+            except (GalleryImage.DoesNotExist, ValueError, TypeError):
                 pass
             OrderCartItem.objects.create(
                 order         = order,
@@ -162,6 +165,15 @@ def save_order(request):
 
         threading.Thread(target=_send_client_confirmation, args=(order,), daemon=True).start()
         threading.Thread(target=_send_studio_notification, args=(order,), daemon=True).start()
+
+        # Send prompt emails if any prompts were in cart
+        prompt_items = [item for item in cart_items_list if item.get('type') == 'prompt']
+        if prompt_items:
+            threading.Thread(
+                target=_send_cart_prompt_emails,
+                args=(prompt_items, name, email),
+                daemon=True
+            ).start()
         return JsonResponse({'orderId': order.short_id})
     except Exception as e:
         logger.error(f"Error saving order: {e}")
@@ -206,8 +218,13 @@ def buy_prompt(request):
             },
             automatic_payment_methods={'enabled': True},
         )
-        return JsonResponse({'clientSecret': intent.client_secret})
+        return JsonResponse({
+            'clientSecret': intent.client_secret,
+            'promptId': str(prompt_id),
+            'promptTitle': prompt.title,
+        })
     except Exception as e:
+        print('PROMPT INTENT ERROR:', str(e))
         return JsonResponse({'error': str(e)}, status=400)
 
 
@@ -219,7 +236,11 @@ def stripe_webhook(request):
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE', '')
     try:
         event = stripe.Webhook.construct_event(payload, sig_header, settings.STRIPE_WEBHOOK_SECRET)
-    except (ValueError, stripe.error.SignatureVerificationError):
+    except ValueError as e:
+        print('WEBHOOK VALUE ERROR:', str(e))
+        return HttpResponse(status=400)
+    except stripe.error.SignatureVerificationError as e:
+        print('WEBHOOK SIGNATURE ERROR:', str(e))
         return HttpResponse(status=400)
     if event['type'] == 'payment_intent.succeeded':
         _handle_payment_succeeded(event['data']['object'])
@@ -227,6 +248,7 @@ def stripe_webhook(request):
 
 
 def _handle_payment_succeeded(intent):
+    print('WEBHOOK RECEIVED:', intent.get('id'), '| type:', intent.get('metadata', {}).get('type'))
     # Handle prompt purchase
     if intent.get('metadata', {}).get('type') == 'prompt':
         try:
@@ -254,23 +276,30 @@ def _handle_payment_succeeded(intent):
         pass
 
 
-def _send_prompt_email(prompt, client_name, client_email):
+def _send_prompt_email(prompt, client_name, client_email, payment_id='', short_id=''):
+    print(f'SENDING PROMPT EMAIL: {prompt.title} to {client_email}')
     try:
         send_mail(
             subject=f"Your Prompt — {prompt.title}",
             message=f"Hi {client_name},\n\nThank you for your purchase!\n\nHere is your prompt:\n\n---\n{prompt.prompt_text}\n---\n\nFeel free to use this prompt in your AI image generation tool.\n\nWarm regards,\nShots By Beysos",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[client_email],
-            fail_silently=True,
+            fail_silently=False,
         )
+        print(f'PROMPT EMAIL SENT SUCCESSFULLY to {client_email}')
+    except Exception as e:
+        print(f'PROMPT EMAIL FAILED: {e}')
+    print(f'SENDING STUDIO PROMPT NOTIFICATION to {settings.STUDIO_EMAIL}')
+    try:
         send_mail(
             subject=f"Prompt Sold — {prompt.title}",
-            message=f"A prompt was purchased.\n\nPrompt: {prompt.title}\nClient: {client_name}\nEmail: {client_email}\nAmount: ${prompt.price}",
+            message=f"A prompt was purchased.\n\nOrder ID: {short_id}\nPrompt: {prompt.title}\nClient: {client_name}\nEmail: {client_email}\nAmount: ${prompt.price}\nPayment ID: {payment_id}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STUDIO_EMAIL],
             fail_silently=True,
         )
     except Exception as e:
+        print(f'STUDIO PROMPT EMAIL FAILED: {e}')
         logger.error(f"Prompt email failed: {e}")
 
 
@@ -298,3 +327,53 @@ def _send_studio_notification(order):
         )
     except Exception as e:
         logger.error(f"Studio email failed: {e}")
+
+
+def _send_cart_prompt_emails(prompt_items, client_name, client_email):
+    from .models import Prompt
+    prompts_text = ''
+    for item in prompt_items:
+        try:
+            prompt = Prompt.objects.get(id=item.get('prompt_id'))
+            prompts_text += f"\n\n--- {prompt.title} ---\n{prompt.prompt_text}\n"
+        except Prompt.DoesNotExist:
+            pass
+    if prompts_text:
+        try:
+            send_mail(
+                subject="Your AI Prompts — Shots By Beysos",
+                message=f"Hi {client_name},\n\nThank you for your purchase! Here are your prompts:\n{prompts_text}\n\nWarm regards,\nShots By Beysos",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[client_email],
+                fail_silently=True,
+            )
+        except Exception as e:
+            logger.error(f"Cart prompt email failed: {e}")
+
+
+
+@require_POST
+def send_prompt_email(request):
+    try:
+        data         = json.loads(request.body)
+        prompt_id    = data.get('prompt_id')
+        client_name  = data.get('client_name', '')
+        client_email = data.get('client_email', '')
+        payment_id   = data.get('payment_id', '')
+        from .models import Prompt, PromptOrder
+        prompt = Prompt.objects.get(id=prompt_id)
+        # Create order record
+        prompt_order = PromptOrder.objects.create(
+            prompt            = prompt,
+            client_name       = client_name,
+            client_email      = client_email,
+            amount_paid       = prompt.price,
+            currency          = settings.CURRENCY,
+            stripe_payment_id = payment_id,
+            status            = 'paid',
+        )
+        _send_prompt_email(prompt, client_name, client_email, payment_id, prompt_order.short_id)
+        return JsonResponse({'status': 'ok', 'orderId': prompt_order.short_id})
+    except Exception as e:
+        logger.error(f"send_prompt_email error: {e}")
+        return JsonResponse({'error': str(e)}, status=400)

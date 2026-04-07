@@ -8,6 +8,7 @@ urlpatterns = [
     path('prompts/',                   views.prompts_store,         name='prompts_store'),
     path('prompts/<slug:slug>/',       views.prompt_category,       name='prompt_category'),
     path('api/buy-prompt/',            views.buy_prompt,            name='buy_prompt'),
+    path('api/send-prompt-email/', views.send_prompt_email, name='send_prompt_email'),
     path('order/',              views.order_form,            name='order_form'),
     path('api/payment-intent/', views.create_payment_intent, name='create_payment_intent'),
     path('api/save-order/',     views.save_order,            name='save_order'),
