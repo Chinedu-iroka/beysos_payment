@@ -7,7 +7,7 @@
 <title>AI Photo Studio — Place Your Order</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
 <script src="https://js.stripe.com/v3/"></script>
-<script src="{% static 'orders/js/cart.js' %}"></script>
+<script src="{% static 'orders/js/cart.js' %}?v=2"></script>
 <style>
   :root { box-sizing: border-box; } *, *::before, *::after { box-sizing: border-box; max-width: 100%; }
 :root {
@@ -868,6 +868,127 @@ function showSuccessScreen(orderId) {
   setStep(4);
   document.getElementById('stepsBar').style.display = 'none';
 }
+
+
+// Prompt checkout modal
+var promptCheckoutStripe = null;
+var promptCheckoutCard   = null;
+
+function openPromptCheckout() {
+  var cart = cartLoad();
+  var prompts = cart.filter(function(i) { return i.type === 'prompt'; });
+  if (prompts.length === 0) return;
+
+  // Show prompt list
+  var itemsHtml = prompts.map(function(p) {
+    return '<div style="display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #eee;">' +
+      '<span>' + p.title + '</span><span style="color:#6B21A8;">$' + p.price + '</span></div>';
+  }).join('');
+  document.getElementById('promptCheckoutItems').innerHTML = itemsHtml;
+
+  // Show total
+  var total = prompts.reduce(function(sum, i) { return sum + i.price_cents; }, 0);
+  document.getElementById('promptCheckoutTotal').textContent = '$' + (total / 100).toFixed(2);
+
+  // Reset form
+  document.getElementById('promptCheckoutName').value  = '';
+  document.getElementById('promptCheckoutEmail').value = '';
+  document.getElementById('promptCheckoutError').style.display = 'none';
+  document.getElementById('promptCheckoutForm').style.display  = 'block';
+  document.getElementById('promptCheckoutSuccess').style.display = 'none';
+  document.getElementById('promptCheckoutPayBtn').disabled    = false;
+  document.getElementById('promptCheckoutPayBtn').textContent = '🔒 Pay & Get Prompts';
+
+  // Show modal
+  document.getElementById('promptCheckoutModal').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  // Init Stripe
+  if (!promptCheckoutStripe) {
+    promptCheckoutStripe = Stripe('{{ stripe_publishable_key }}');
+    var elements = promptCheckoutStripe.elements();
+    promptCheckoutCard = elements.create('card', {
+      style: {
+        base: { fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#1a0533' },
+        invalid: { color: '#e87c6e' }
+      }
+    });
+    promptCheckoutCard.mount('#promptCheckoutCard');
+  }
+}
+
+function closePromptCheckout() {
+  document.getElementById('promptCheckoutModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+async function handlePromptCheckout() {
+  var name  = document.getElementById('promptCheckoutName').value.trim();
+  var email = document.getElementById('promptCheckoutEmail').value.trim();
+  var errorEl = document.getElementById('promptCheckoutError');
+
+  if (!name)  { errorEl.textContent = 'Please enter your full name.'; errorEl.style.display = 'block'; return; }
+  if (!email || !/\S+@\S+\.\S+/.test(email)) { errorEl.textContent = 'Please enter a valid email.'; errorEl.style.display = 'block'; return; }
+
+  var btn = document.getElementById('promptCheckoutPayBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  errorEl.style.display = 'none';
+
+  var cart    = cartLoad();
+  var prompts = cart.filter(function(i) { return i.type === 'prompt'; });
+  var total   = prompts.reduce(function(sum, i) { return sum + i.price_cents; }, 0);
+
+  try {
+    // Create payment intent
+    var intentRes = await fetch('/api/buy-prompt-bulk/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+      body: JSON.stringify({
+        prompt_ids:   prompts.map(function(p) { return p.prompt_id; }),
+        amount:       total,
+        client_name:  name,
+        client_email: email,
+      })
+    });
+    var intentData = await intentRes.json();
+    if (intentData.error) throw new Error(intentData.error);
+
+    var result = await promptCheckoutStripe.confirmCardPayment(intentData.clientSecret, {
+      payment_method: { card: promptCheckoutCard, billing_details: { name: name, email: email } }
+    });
+
+    if (result.error) throw new Error(result.error.message);
+
+    if (result.paymentIntent.status === 'succeeded') {
+      // Send all prompt emails
+      await fetch('/api/send-bulk-prompt-email/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+        body: JSON.stringify({
+          prompt_ids:   prompts.map(function(p) { return p.prompt_id; }),
+          client_name:  name,
+          client_email: email,
+          payment_id:   result.paymentIntent.id,
+        })
+      });
+      cartEmpty();
+      document.getElementById('promptCheckoutForm').style.display   = 'none';
+      document.getElementById('promptCheckoutSuccessEmail').textContent = email;
+      document.getElementById('promptCheckoutSuccess').style.display = 'block';
+    }
+  } catch(err) {
+    errorEl.textContent = err.message || 'Payment failed. Please try again.';
+    errorEl.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = '🔒 Pay & Get Prompts';
+  }
+}
+
+function getCsrfToken() {
+  var cookie = document.cookie.split(';').find(function(c) { return c.trim().startsWith('csrftoken='); });
+  return cookie ? cookie.trim().split('=')[1] : '';
+}
 </script>
 
 <!-- CART OVERLAY + DRAWER -->
@@ -899,5 +1020,39 @@ function showSuccessScreen(orderId) {
   </div>
 </div>
 
+
+<!-- PROMPT CHECKOUT MODAL -->
+<div class="modal-overlay" id="promptCheckoutModal" style="position:fixed;inset:0;z-index:700;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(8px);">
+  <div style="background:#fff;border-radius:4px;width:100%;max-width:480px;padding:40px;position:relative;">
+    <button onclick="closePromptCheckout()" style="position:absolute;top:16px;right:20px;background:none;border:none;font-size:24px;cursor:pointer;color:#6B7280;">×</button>
+    <div id="promptCheckoutForm">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;font-weight:300;color:#1a0533;margin-bottom:6px;">Complete Purchase</div>
+      <div style="font-size:12px;color:#6B7280;margin-bottom:16px;">Your prompts will be sent to your email after payment.</div>
+      <div id="promptCheckoutItems" style="margin-bottom:16px;padding:12px;background:#f9f9f9;border-radius:4px;font-size:12px;color:#1a0533;"></div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:2rem;color:#6B21A8;margin-bottom:20px;" id="promptCheckoutTotal">$0.00</div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B7280;margin-bottom:6px;">Full Name</label>
+        <input type="text" id="promptCheckoutName" placeholder="e.g. Amara Johnson" style="width:100%;padding:12px 14px;border:1px solid rgba(107,33,168,0.2);border-radius:2px;font-size:14px;color:#1a0533;outline:none;"/>
+      </div>
+      <div style="margin-bottom:16px;">
+        <label style="display:block;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B7280;margin-bottom:6px;">Email Address</label>
+        <input type="email" id="promptCheckoutEmail" placeholder="you@example.com" style="width:100%;padding:12px 14px;border:1px solid rgba(107,33,168,0.2);border-radius:2px;font-size:14px;color:#1a0533;outline:none;"/>
+      </div>
+      <div style="margin-bottom:20px;">
+        <label style="display:block;font-size:10px;letter-spacing:0.2em;text-transform:uppercase;color:#6B7280;margin-bottom:6px;">Card Details</label>
+        <div id="promptCheckoutCard" style="border:1px solid rgba(107,33,168,0.2);border-radius:2px;padding:12px 14px;"></div>
+      </div>
+      <div id="promptCheckoutError" style="color:#e87c6e;font-size:12px;margin-bottom:12px;display:none;"></div>
+      <button id="promptCheckoutPayBtn" onclick="handlePromptCheckout()" style="width:100%;padding:16px;background:#6B21A8;color:#fff;border:none;border-radius:2px;font-family:'DM Sans',sans-serif;font-size:11px;letter-spacing:0.25em;text-transform:uppercase;font-weight:500;cursor:pointer;">
+        🔒 Pay & Get Prompts
+      </button>
+    </div>
+    <div id="promptCheckoutSuccess" style="display:none;text-align:center;padding:20px 0;">
+      <div style="font-size:48px;margin-bottom:16px;">✓</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:1.8rem;color:#1a0533;margin-bottom:10px;">Payment Successful!</div>
+      <p style="font-size:13px;color:#6B7280;line-height:1.8;">Your prompts have been sent to <strong id="promptCheckoutSuccessEmail"></strong>.<br/>Check your inbox — they should arrive within a few minutes.</p>
+    </div>
+  </div>
+</div>
 </body>
 </html>

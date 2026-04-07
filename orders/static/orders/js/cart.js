@@ -23,19 +23,49 @@ function cartAdd(item) {
 
 function cartRemove(id) {
   cartSave(cartLoad().filter(function(i) { return String(i.id) !== String(id); }));
+
+  // Reset gallery image button (id is a number)
   var btn  = document.getElementById('cart-btn-' + id);
   var card = document.getElementById('card-' + id);
   if (btn)  { btn.textContent = '+ Add to Cart'; btn.classList.remove('added'); }
   if (card) { card.classList.remove('in-cart'); }
+
+  // Reset prompt button (id is like "prompt-123", so extract the number)
+  var promptBtn = document.getElementById('prompt-cart-btn-' + String(id).replace('prompt-', ''));
+  if (promptBtn) {
+    promptBtn.textContent = '+ Cart';
+    promptBtn.style.background = 'transparent';
+    promptBtn.style.color = 'var(--gold)';
+  }
+
+  // Reset bundle button (id is like "bundle-123")
+  var bundleBtn = document.getElementById('bundle-cart-btn-' + String(id).replace('bundle-', ''));
+  if (bundleBtn) { bundleBtn.textContent = '+ Add Bundle to Cart'; bundleBtn.classList.remove('added'); }
+
   cartRenderAll();
 }
 
 function cartEmpty() {
   cartLoad().forEach(function(item) {
-    var btn  = document.getElementById('cart-btn-' + item.id);
-    var card = document.getElementById('card-' + item.id);
+    var id = item.id;
+
+    // Gallery image button
+    var btn  = document.getElementById('cart-btn-' + id);
+    var card = document.getElementById('card-' + id);
     if (btn)  { btn.textContent = '+ Add to Cart'; btn.classList.remove('added'); }
     if (card) { card.classList.remove('in-cart'); }
+
+    // Prompt button
+    var promptBtn = document.getElementById('prompt-cart-btn-' + String(id).replace('prompt-', ''));
+    if (promptBtn) {
+      promptBtn.textContent = '+ Cart';
+      promptBtn.style.background = 'transparent';
+      promptBtn.style.color = 'var(--gold)';
+    }
+
+    // Bundle button
+    var bundleBtn = document.getElementById('bundle-cart-btn-' + String(id).replace('bundle-', ''));
+    if (bundleBtn) { bundleBtn.textContent = '+ Add Bundle to Cart'; bundleBtn.classList.remove('added'); }
   });
   cartClear();
   cartRenderAll();
@@ -141,6 +171,15 @@ function closeCart() {
 function proceedToBook(orderUrl) {
   var cart = cartLoad();
   if (cart.length === 0) return;
+
+  // Check if all items are prompts
+  var allPrompts = cart.every(function(i) { return i.type === 'prompt'; });
+  if (allPrompts) {
+    if (typeof openPromptCheckout === 'function') openPromptCheckout();
+    return;
+  }
+
+  // Filter out prompt items for the order form — prompts will be emailed after payment
   var styles     = cart.map(function(i) { return i.category; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
   var titles     = cart.map(function(i) { return i.title; }).join(', ');
   var totalCents = cartTotalCents();

@@ -17,7 +17,9 @@ stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
 def home(request):
-    return render(request, 'orders/home.html')
+    return render(request, 'orders/home.html', {
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
+    })
 
 
 def gallery(request):
@@ -32,7 +34,10 @@ def gallery(request):
             cover = cat.images.filter(is_visible=True).first()
         cat.cover_image = cover
 
-    return render(request, 'orders/gallery.html', {'categories': categories})
+    return render(request, 'orders/gallery.html', {
+        'categories': categories,
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
+    })
 
 def gallery_category(request, slug):
     from .models import GalleryCategory
@@ -44,6 +49,7 @@ def gallery_category(request, slug):
         'category':   category,
         'categories': categories,
         'images':     images,
+        'stripe_publishable_key': settings.STRIPE_PUBLISHABLE_KEY,
     })
 
 @require_POST
@@ -376,4 +382,75 @@ def send_prompt_email(request):
         return JsonResponse({'status': 'ok', 'orderId': prompt_order.short_id})
     except Exception as e:
         logger.error(f"send_prompt_email error: {e}")
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@require_POST
+def buy_prompt_bulk(request):
+    try:
+        data        = json.loads(request.body)
+        prompt_ids  = data.get('prompt_ids', [])
+        amount      = int(data.get('amount', 0))
+        client_name  = data.get('client_name', '')
+        client_email = data.get('client_email', '')
+        intent = stripe.PaymentIntent.create(
+            amount   = amount,
+            currency = settings.CURRENCY,
+            metadata = {
+                'type':          'prompt_bulk',
+                'prompt_ids':    ','.join(str(i) for i in prompt_ids),
+                'client_email':  client_email,
+                'client_name':   client_name,
+            },
+            automatic_payment_methods={'enabled': True},
+        )
+        return JsonResponse({'clientSecret': intent.client_secret})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=400)
+
+
+@require_POST
+def send_bulk_prompt_email(request):
+    try:
+        data         = json.loads(request.body)
+        prompt_ids   = data.get('prompt_ids', [])
+        client_name  = data.get('client_name', '')
+        client_email = data.get('client_email', '')
+        payment_id   = data.get('payment_id', '')
+        from .models import Prompt, PromptOrder
+        prompts_text = ''
+        for pid in prompt_ids:
+            try:
+                prompt = Prompt.objects.get(id=pid)
+                PromptOrder.objects.create(
+                    prompt            = prompt,
+                    client_name       = client_name,
+                    client_email      = client_email,
+                    amount_paid       = prompt.price,
+                    currency          = settings.CURRENCY,
+                    stripe_payment_id = f"{payment_id}-{pid}",
+                    status            = 'paid',
+                )
+                prompts_text += f"\n\n--- {prompt.title} ---\n{prompt.prompt_text}\n"
+            except Prompt.DoesNotExist:
+                pass
+        # Send client email with all prompts
+        if prompts_text and client_email:
+            send_mail(
+                subject=f"Your AI Prompts — Shots By Beysos",
+                message=f"Hi {client_name},\n\nThank you for your purchase! Here are your prompts:\n{prompts_text}\n\nWarm regards,\nShots By Beysos",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[client_email],
+                fail_silently=True,
+            )
+            send_mail(
+                subject=f"Bulk Prompt Sale — {len(prompt_ids)} prompts",
+                message=f"Bulk prompt purchase.\n\nClient: {client_name}\nEmail: {client_email}\nPrompts: {len(prompt_ids)}\nPayment ID: {payment_id}",
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[settings.STUDIO_EMAIL],
+                fail_silently=True,
+            )
+        return JsonResponse({'status': 'ok'})
+    except Exception as e:
+        logger.error(f"send_bulk_prompt_email error: {e}")
         return JsonResponse({'error': str(e)}, status=400)

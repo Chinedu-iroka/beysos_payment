@@ -7,7 +7,7 @@
   <title>Prompt Store — Shots By Beysos</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <script src="{% static 'orders/js/cart.js' %}"></script>
+  <script src="{% static 'orders/js/cart.js' %}?v=2"></script>
   <style>
     :root {
       --ink:        #1a0533;
@@ -24,18 +24,18 @@
     body { background: #ffffff; color: #1a0533; font-family: 'DM Sans', sans-serif; font-weight: 300; margin: 0; }
 
     /* PROMO BAR */
-    .nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: #fff; text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
+    .nav-promo { position: fixed; top: 0; left: 0; right: 0; z-index: 101; background: var(--gold); color: #1a0533; text-align: center; padding: 8px; font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase; font-weight: 500; }
 
     /* NAVBAR */
     .nav { position: fixed; top: 36px; left: 0; right: 0; z-index: 100; display: flex; align-items: center; justify-content: flex-end; padding: 22px 60px 22px 180px; transition: background 0.4s, padding 0.4s; }
     .nav.scrolled { background: rgba(13,13,13,0.92); backdrop-filter: blur(16px); padding: 14px 60px; border-bottom: 1px solid var(--border); }
     .nav-logo { position: absolute; top: -10px; left: 60px; z-index: 102; }
     .nav-logo img { height: 120px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.15)); }
-    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; margin: 0; padding: 0; }
-    .nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: #00D4FF; text-decoration: none; transition: color 0.3s; position: relative; }
-    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+    .nav-links { display: flex; align-items: center; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; position: relative; }
     .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 1px; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.3s; }
-    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a:hover, .nav-links a.active { color: var(--gold); }
+    .nav-links a:hover::after, .nav-links a.active::after { transform: scaleX(1); }
     .nav-cta { background: var(--gold) !important; color: #fff !important; padding: 9px 22px; border-radius: 2px; font-weight: 500 !important; }
     .nav-cta:hover { background: var(--gold-light) !important; }
     .nav-cta::after { display: none !important; }
@@ -83,7 +83,7 @@
     .page-container { max-width: 1200px; margin: 0 auto; padding: 160px 40px 80px; }
 
     .page-header { text-align: center; margin-bottom: 60px; }
-    .page-eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; }
+    .page-eyebrow { font-size: 11px; letter-spacing: 0.4em; text-transform: uppercase; color: var(--gold); margin-bottom: 16px; font-weight: bold; }
     .page-title { font-family: 'Cormorant Garamond', serif; font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 300; color: var(--ink); line-height: 1.1; margin-bottom: 20px; }
     .page-title em { font-style: italic; color: var(--gold); }
     .page-subtitle { font-size: 15px; color: var(--muted); max-width: 500px; margin: 0 auto; line-height: 1.8; }
@@ -93,8 +93,16 @@
 
     /* CATEGORY TABS */
     .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
-    .cat-tab { padding: 8px 20px; border: 1px solid var(--border); border-radius: 2px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: all 0.3s; background: transparent; cursor: pointer; }
-    .cat-tab:hover, .cat-tab.active { background: var(--gold); color: #fff; border-color: var(--gold); }
+    .cat-tab { padding: 8px 20px; border: 1px solid var(--border); border-radius: 2px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink); text-decoration: var(--ink); transition: all 0.3s; background: transparent; cursor: pointer; }
+    .cat-tab:hover, .cat-tab.active { background: var(--gold); color: #1a0533;; border-color: var(--gold); }
+
+    .cart-item { display: flex; gap: 14px; align-items: flex-start; padding: 14px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 2px; }
+    .cart-item-img { width: 64px; height: 64px; flex-shrink: 0; object-fit: cover; border-radius: 2px; border: 1px solid var(--border); }
+    .cart-item-info { flex: 1; min-width: 0; }
+    .cart-item-info .cat { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 4px; }
+    .cart-item-info .title { font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .cart-item-remove { background: none; border: none; color: var(--muted); font-size: 18px; cursor: pointer; line-height: 1; transition: color 0.2s; flex-shrink: 0; padding: 0; }
+    .cart-item-remove:hover { color: #e87c6e; }
 
     /* PROMPT GRID */
     .prompts-section { margin-bottom: 60px; }
@@ -107,14 +115,14 @@
     .prompt-card-image { position: relative; height: 220px; overflow: hidden; }
     .prompt-card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s; }
     .prompt-card:hover .prompt-card-image img { transform: scale(1.04); }
-    .prompt-price-tag { position: absolute; top: 12px; right: 12px; background: var(--gold); color: #fff; font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 2px; }
+    .prompt-price-tag { position: absolute; top: 12px; right: 12px; background: var(--ink); color: var(--gold); font-size: 12px; font-weight: 500; padding: 4px 10px; border-radius: 2px; }
     .prompt-card-body { padding: 20px; }
-    .prompt-card-category { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--gold); margin-bottom: 8px; }
+    .prompt-card-category { font-size: 9px; letter-spacing: 0.25em; text-transform: uppercase; color: var(--ink); margin-bottom: 8px; font weight bold;}
     .prompt-card-title { font-family: 'Cormorant Garamond', serif; font-size: 1.3rem; font-weight: 400; color: var(--ink); margin-bottom: 10px; line-height: 1.3; }
     .prompt-card-desc { font-size: 12px; color: var(--muted); line-height: 1.7; margin-bottom: 16px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
     .prompt-card-footer { display: flex; align-items: center; justify-content: space-between; padding-top: 14px; border-top: 1px solid var(--border); }
-    .prompt-card-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--gold); font-weight: 400; }
-    .btn-buy-prompt { background: var(--gold); color: #fff; border: none; padding: 10px 20px; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; cursor: pointer; transition: all 0.3s; }
+    .prompt-card-price { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--ink); font-weight: 400; }
+    .btn-buy-prompt { background: var(--gold); color: #1a0533; border: none; padding: 10px 20px; border-radius: 2px; font-family: 'DM Sans', sans-serif; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 500; cursor: pointer; transition: all 0.3s; }
     .btn-buy-prompt:hover { background: var(--gold-light); transform: translateY(-1px); }
 
     /* PURCHASE MODAL */
@@ -153,7 +161,7 @@
 </head>
 <body>
 
-<div class="nav-promo">✦ Book Your Session Today &amp; Receive Your Transformed Photo in 24–48 Hours ✦</div>
+<div class="nav-promo">✦ AI Prompt Store ✦</div>
 
 <nav class="nav" id="navbar">
   <a href="{% url 'home' %}" class="nav-logo">
@@ -163,7 +171,7 @@
     <li><a href="{% url 'home' %}">Home</a></li>
     <li><a href="{% url 'gallery' %}">Gallery</a></li>
     <li><a href="{% url 'prompts_store' %}">Prompts Shop</a></li>
-    <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li>
+    {% comment %} <li><a href="{% url 'order_form' %}" class="nav-cta">Book Now</a></li> {% endcomment %}
     <li>
       <button class="nav-cart" onclick="toggleCart()" title="View cart">
         🛒 Cart
@@ -218,7 +226,7 @@
     <button class="btn-buy-prompt" onclick="openPurchaseModal({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }})">
       ✦ Buy Now
     </button>
-    <button class="btn-buy-prompt" id="prompt-cart-btn-{{ prompt.id }}" style="background:transparent;border:1px solid var(--gold);color:var(--gold);" onclick="addPromptToCart({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }}, '{% if prompt.preview_image %}{{ prompt.preview_image.url|escapejs }}{% endif %}')">
+    <button class="btn-buy-prompt" id="prompt-cart-btn-{{ prompt.id }}" style="background:transparent;border:1px solid var(--gold);color:var(--ink);" onclick="addPromptToCart({{ prompt.id }}, '{{ prompt.title|escapejs }}', '{{ prompt.price }}', {{ prompt.price_cents }}, '{% if prompt.preview_image %}{{ prompt.preview_image.url|escapejs }}{% endif %}')">
       + Cart
     </button>
   </div>
@@ -374,6 +382,7 @@ function openPurchaseModal(promptId, title, price, priceCents) {
   if (promptCardElement) {
     promptCardElement.clear();
   }
+  document.getElementById('payPromptBtn').onclick = handlePromptPayment;
   document.getElementById('purchaseModal').classList.add('open');
   document.body.style.overflow = 'hidden';
 
@@ -451,9 +460,105 @@ async function handlePromptPayment() {
   }
 }
 
-{% comment %} document.getElementById('purchaseModal').addEventListener('click', function(e) {
-  if (e.target === this) closeModal();
-}); {% endcomment %}
+
+function openPromptCheckout() {
+  var cart = cartLoad();
+  var promptItems = cart.filter(function(i) { return i.type === 'prompt'; });
+  if (promptItems.length === 0) return;
+
+  var totalCents = cartTotalCents();
+  var totalDollars = (totalCents / 100).toFixed(2);
+
+  document.getElementById('modalPromptTitle').textContent =
+    promptItems.length === 1 ? promptItems[0].title : promptItems.length + ' Prompts';
+  document.getElementById('modalPromptPrice').textContent = '$' + totalDollars;
+  document.getElementById('modalForm').style.display = 'block';
+  document.getElementById('modalSuccess').style.display = 'none';
+  document.getElementById('modalError').style.display = 'none';
+  document.getElementById('promptBuyerName').value = '';
+  document.getElementById('promptBuyerEmail').value = '';
+
+  var btn = document.getElementById('payPromptBtn');
+  btn.disabled = false;
+  btn.textContent = '🔒 Pay & Get Prompts';
+  btn.onclick = function() { handleBulkPromptPayment(promptItems, totalCents); };
+
+  if (promptCardElement) { promptCardElement.clear(); }
+
+  document.getElementById('purchaseModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+
+  if (!stripeInstance) {
+    stripeInstance = Stripe(STRIPE_KEY);
+    var elements = stripeInstance.elements();
+    promptCardElement = elements.create('card', {
+      style: {
+        base: { fontFamily: "'DM Sans', sans-serif", fontSize: '14px', color: '#1a0533', '::placeholder': { color: 'rgba(107,33,168,0.4)' } },
+        invalid: { color: '#e87c6e' }
+      }
+    });
+    promptCardElement.mount('#promptCardElement');
+    promptCardElement.on('focus', function() { document.getElementById('promptCardElement').classList.add('focused'); });
+    promptCardElement.on('blur',  function() { document.getElementById('promptCardElement').classList.remove('focused'); });
+  }
+}
+
+async function handleBulkPromptPayment(promptItems, totalCents) {
+  var name  = document.getElementById('promptBuyerName').value.trim();
+  var email = document.getElementById('promptBuyerEmail').value.trim();
+  if (!name)  return showModalError('Please enter your full name.');
+  if (!email || !/\S+@\S+\.\S+/.test(email)) return showModalError('Please enter a valid email address.');
+
+  var btn = document.getElementById('payPromptBtn');
+  btn.disabled = true;
+  btn.textContent = 'Processing...';
+  document.getElementById('modalError').style.display = 'none';
+
+  try {
+    var intentRes = await fetch('/api/buy-prompt-bulk/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+      body: JSON.stringify({
+        prompt_ids:   promptItems.map(function(i) { return i.prompt_id; }),
+        amount:       totalCents,
+        client_name:  name,
+        client_email: email,
+      })
+    });
+    var intentData = await intentRes.json();
+    if (intentData.error) throw new Error(intentData.error);
+
+    var result = await stripeInstance.confirmCardPayment(intentData.clientSecret, {
+      payment_method: { card: promptCardElement, billing_details: { name: name, email: email } }
+    });
+
+    if (result.error) throw new Error(result.error.message);
+
+    if (result.paymentIntent.status === 'succeeded') {
+      await fetch('/api/send-bulk-prompt-email/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF_TOKEN },
+        body: JSON.stringify({
+          prompt_ids:   promptItems.map(function(i) { return i.prompt_id; }),
+          client_name:  name,
+          client_email: email,
+          payment_id:   result.paymentIntent.id,
+        })
+      });
+
+      cartClear();
+      cartRenderAll();
+
+      document.getElementById('modalForm').style.display = 'none';
+      document.getElementById('successEmail').textContent = email;
+      document.getElementById('modalSuccess').style.display = 'block';
+    }
+  } catch (err) {
+    showModalError(err.message || 'Payment failed. Please try again.');
+    btn.disabled = false;
+    btn.textContent = '🔒 Pay & Get Prompts';
+  }
+}
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeModal(); closeCart(); }
