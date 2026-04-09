@@ -170,7 +170,7 @@ def save_order(request):
             )
 
         threading.Thread(target=_send_client_confirmation, args=(order,), daemon=True).start()
-        threading.Thread(target=_send_studio_notification, args=(order,), daemon=True).start()
+        threading.Thread(target=_send_studio_notification, args=(order, cart_items_list), daemon=True).start()
 
         # Send prompt emails if any prompts were in cart
         prompt_items = [item for item in cart_items_list if item.get('type') == 'prompt']
@@ -336,11 +336,17 @@ def _send_client_confirmation(order):
         logger.error(f"Client email failed: {e}")
 
 
-def _send_studio_notification(order):
+def _send_studio_notification(order, cart_items=None):
     try:
+        cart_items    = cart_items or []
+        photo_count   = len([i for i in cart_items if i.get('type') != 'prompt'])
+        prompt_count  = len([i for i in cart_items if i.get('type') == 'prompt'])
+        type_line     = f"Photo order: {photo_count}"
+        if prompt_count > 0:
+            type_line += f", Prompt order: {prompt_count}"
         send_mail(
             subject=f"New Order #{order.short_id} — {order.style_chosen}",
-            message=f"New order!\n\nClient: {order.client_name}\nEmail: {order.client_email}\nBooking ID: {order.booking_id}\nStyle: {order.style_chosen}\nPhotos: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\nStripe ID: {order.stripe_payment_id}",
+            message=f"New order!\n\nClient: {order.client_name}\nEmail: {order.client_email}\nStyle: {order.style_chosen}\nType: {type_line}\nPhotos: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\nStripe ID: {order.stripe_payment_id}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STUDIO_EMAIL],
             fail_silently=True,
