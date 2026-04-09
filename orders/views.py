@@ -285,13 +285,27 @@ def _handle_payment_succeeded(intent):
 def _send_prompt_email(prompt, client_name, client_email, payment_id='', short_id=''):
     print(f'SENDING PROMPT EMAIL: {prompt.title} to {client_email}')
     try:
-        send_mail(
+        from django.core.mail import EmailMessage
+        body = f"Hi {client_name},\n\nThank you for your purchase!\n\n"
+        if prompt.prompt_text:
+            body += f"Here is your prompt:\n\n---\n{prompt.prompt_text}\n---\n\n"
+        if prompt.prompt_file:
+            body += "Your prompt file is attached to this email.\n\n"
+        body += "Feel free to use this prompt in your AI image generation tool.\n\nWarm regards,\nShots By Beysos"
+
+        email_msg = EmailMessage(
             subject=f"Your Prompt — {prompt.title}",
-            message=f"Hi {client_name},\n\nThank you for your purchase!\n\nHere is your prompt:\n\n---\n{prompt.prompt_text}\n---\n\nFeel free to use this prompt in your AI image generation tool.\n\nWarm regards,\nShots By Beysos",
+            body=body,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[client_email],
-            fail_silently=False,
+            to=[client_email],
         )
+        if prompt.prompt_file:
+            import os
+            file_path = prompt.prompt_file.path
+            file_name = os.path.basename(file_path)
+            with open(file_path, 'rb') as f:
+                email_msg.attach(file_name, f.read())
+        email_msg.send(fail_silently=False)
         print(f'PROMPT EMAIL SENT SUCCESSFULLY to {client_email}')
     except Exception as e:
         print(f'PROMPT EMAIL FAILED: {e}')
@@ -436,13 +450,27 @@ def send_bulk_prompt_email(request):
                 pass
         # Send client email with all prompts
         if prompts_text and client_email:
-            send_mail(
+            from django.core.mail import EmailMessage
+            import os
+            body = f"Hi {client_name},\n\nThank you for your purchase! Here are your prompts:\n{prompts_text}\n\nWarm regards,\nShots By Beysos"
+            email_msg = EmailMessage(
                 subject=f"Your AI Prompts — Shots By Beysos",
-                message=f"Hi {client_name},\n\nThank you for your purchase! Here are your prompts:\n{prompts_text}\n\nWarm regards,\nShots By Beysos",
+                body=body,
                 from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[client_email],
-                fail_silently=True,
+                to=[client_email],
             )
+            # Attach files for all prompts that have files
+            for pid in prompt_ids:
+                try:
+                    p = Prompt.objects.get(id=pid)
+                    if p.prompt_file:
+                        file_path = p.prompt_file.path
+                        file_name = os.path.basename(file_path)
+                        with open(file_path, 'rb') as f:
+                            email_msg.attach(file_name, f.read())
+                except Prompt.DoesNotExist:
+                    pass
+            email_msg.send(fail_silently=True)
             send_mail(
                 subject=f"Bulk Prompt Sale — {len(prompt_ids)} prompts",
                 message=f"Bulk prompt purchase.\n\nClient: {client_name}\nEmail: {client_email}\nPrompts: {len(prompt_ids)}\nPayment ID: {payment_id}",

@@ -67,7 +67,7 @@ class GalleryImageAdmin(admin.ModelAdmin):
 class PromptInline(admin.TabularInline):
     model  = Prompt
     extra  = 1
-    fields = ('title', 'preview_image', 'price', 'is_visible')
+    fields = ('title', 'preview_image', 'prompt_text', 'prompt_file', 'price', 'is_visible')
 
 @admin.register(PromptCategory)
 class PromptCategoryAdmin(admin.ModelAdmin):
@@ -82,6 +82,7 @@ class PromptAdmin(admin.ModelAdmin):
     list_filter   = ('category', 'is_visible')
     search_fields = ('title',)
     list_editable = ('price', 'is_visible')
+    fields        = ('category', 'title', 'description', 'preview_image', 'prompt_text', 'prompt_file', 'price', 'is_visible')
 
 
 @admin.register(PromptOrder)
