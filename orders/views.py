@@ -144,7 +144,7 @@ def save_order(request):
             amount = (settings.PRICE_PER_PHOTO * max(photo_count, 1)) / 100
         order = Order.objects.create(
             booking_id=booking_id, client_name=name, client_email=email,
-            style_chosen=style, special_notes=notes, photo_count=cart_count if cart_count > 0 else photo_count,
+            style_chosen=style, special_notes=notes, photo_count=photo_count,
             amount_paid=amount, currency=settings.CURRENCY,
             stripe_payment_id=payment_id, status='paid',
         )
