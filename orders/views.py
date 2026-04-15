@@ -327,7 +327,7 @@ def _send_client_confirmation(order):
     try:
         send_mail(
             subject=f"Order Confirmed — Shots By Beysos (#{order.short_id})",
-            message=f"Hi {order.client_name},\n\nThank you for your order!\n\nOrder ID: {order.short_id}\nStyle: {order.style_chosen}\nPhotos: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\n\nYour transformed photo will be delivered within 24–48 hours.\n\nWarm regards,\nShots By Beysos",
+            message=f"Hi {order.client_name},\n\nThank you for your order!\n\nOrder ID: {order.short_id}\nStyles you choose: {order.style_chosen}\nPhotos you uploaded: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\n\nYour transformed photo will be delivered within 24–48 hours.\n\nWarm regards,\nShots By Beysos",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[order.client_email],
             fail_silently=True,
@@ -346,7 +346,7 @@ def _send_studio_notification(order, cart_items=None):
             type_line += f", Prompt order: {prompt_count}"
         send_mail(
             subject=f"New Order #{order.short_id} — {order.style_chosen}",
-            message=f"New order!\n\nClient: {order.client_name}\nEmail: {order.client_email}\nStyle: {order.style_chosen}\nType: {type_line}\nPhotos: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\nStripe ID: {order.stripe_payment_id}",
+            message=f"New order!\n\nClient: {order.client_name}\nEmail: {order.client_email}\nStyle: {order.style_chosen}\nType: {type_line}\nPhotos client uploaded: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\nStripe ID: {order.stripe_payment_id}",
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STUDIO_EMAIL],
             fail_silently=True,

@@ -611,7 +611,7 @@
         <div class="success-icon">✓</div>
         <h2>Order Confirmed!</h2>
         <p>Payment successful. Your order has been received and our team will begin transforming your photo shortly.</p>
-        <p>A confirmation has been sent to <strong id="confEmail" style="color:var(--cream)"></strong></p>
+        <p>A confirmation has been sent to <strong id="confEmail" style="color:var(--ink)"></strong></p>
         <p style="margin-top:10px">Expect your AI-enhanced photo within <strong style="color:var(--cream)">24 - 48 hours.</strong></p>
         <div class="order-id" id="orderId"></div>
       </div>
@@ -783,6 +783,13 @@ function setStep(n) {
 async function handlePayment() {
   const btn = document.getElementById('payBtn');
   clearMsg('cardErrors');
+
+  // Validate required fields
+  const name  = document.getElementById('clientName').value.trim();
+  const email = document.getElementById('clientEmail').value.trim();
+  if (!name)  return showMsg('cardErrors', 'Please enter your full name.');
+  if (!email || !/\S+@\S+\.\S+/.test(email)) return showMsg('cardErrors', 'Please enter a valid email address.');
+  if (uploadedFiles.length === 0) return showMsg('cardErrors', 'Please upload at least one photo before paying.');
 
   // Demo mode
   if (CONFIG.stripePublishableKey.includes('REPLACE')) {

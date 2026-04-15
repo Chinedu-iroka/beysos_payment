@@ -73,6 +73,7 @@ class GalleryImage(models.Model):
     category   = models.ForeignKey(GalleryCategory, related_name='images', on_delete=models.CASCADE)
     image      = models.ImageField(upload_to='gallery/%Y/%m/', blank=True, null=True)
     video      = models.FileField(upload_to='gallery/videos/%Y/%m/', blank=True, null=True, help_text="Upload a video file (MP4 recommended)")
+    video_thumbnail = models.ImageField(upload_to='gallery/thumbnails/%Y/%m/', blank=True, null=True, help_text="Thumbnail image for the video (shown in cart and admin)")
     title      = models.CharField(max_length=200, blank=True)
     price      = models.DecimalField(max_digits=8, decimal_places=2, default=25.00)  # ← add this
     shopify_link = models.URLField(blank=True, null=True, help_text="Shopify product link for this image")

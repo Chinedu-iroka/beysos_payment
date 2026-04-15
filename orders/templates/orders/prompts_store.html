@@ -59,7 +59,8 @@
       .nav-links.open { display: flex; }
       .nav-links a { font-size: 14px; }
     }
-
+    .cart-badge { background: var(--gold); color: #fff; font-size: 9px; font-weight: 700; width: 18px; height: 18px; border-radius: 50%; display: none; align-items: center; justify-content: center; position: absolute; top: -7px; right: -7px; }
+    .cart-badge.visible { display: flex; }
     /* CART DRAWER */
     .cart-overlay { position: fixed; inset: 0; z-index: 300; background: rgba(13,13,13,0.6); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
     .cart-overlay.open { opacity: 1; pointer-events: all; }
