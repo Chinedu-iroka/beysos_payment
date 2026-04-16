@@ -180,7 +180,7 @@ def save_order(request):
         if prompt_items:
             threading.Thread(
                 target=_send_cart_prompt_emails,
-                args=(prompt_items, name, email),
+                args=(prompt_items, name, email, payment_id),
                 daemon=True
             ).start()
         return JsonResponse({'orderId': order.short_id})
@@ -368,13 +368,23 @@ def _send_studio_notification(order, cart_items=None):
         logger.error(f"Studio email failed: {e}")
 
 
-def _send_cart_prompt_emails(prompt_items, client_name, client_email):
-    from .models import Prompt
+def _send_cart_prompt_emails(prompt_items, client_name, client_email, payment_id=''):
+    from .models import Prompt, PromptOrder
     prompts_text = ''
     for item in prompt_items:
         try:
             prompt = Prompt.objects.get(id=item.get('prompt_id'))
             prompts_text += f"\n\n--- {prompt.title} ---\n{prompt.prompt_text}\n"
+            # Create PromptOrder record
+            PromptOrder.objects.create(
+                prompt            = prompt,
+                client_name       = client_name,
+                client_email      = client_email,
+                amount_paid       = prompt.price,
+                currency          = settings.CURRENCY,
+                stripe_payment_id = f"{payment_id}-{prompt.id}",
+                status            = 'paid',
+            )
         except Prompt.DoesNotExist:
             pass
     if prompts_text:
