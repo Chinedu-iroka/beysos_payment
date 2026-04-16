@@ -242,7 +242,7 @@
   .field input[type="text"],
   .field input[type="email"] {
     width: 100%;
-    background: rgba(255,255,255,0.04);
+    background: #f9f7f4;
     border: 1px solid var(--border);
     border-radius: 2px;
     padding: 13px 16px;
@@ -576,6 +576,8 @@
       <div class="field">
         <label>Special Instructions <span style="color:var(--muted);font-size:10px;letter-spacing:0">(optional)</span></label>
         <input type="text" id="specialNotes" placeholder="e.g. Keep my natural hair colour"/>
+        <!-- Add this hidden input inside your form -->
+        <input type="hidden" id="selectedImageHidden" value="{{ selected_image|escapejs }}"/>
       </div>
 
       <div class="summary-box">
@@ -668,7 +670,13 @@ const CONFIG = {
 };
 
 // State
-let selectedStyle = '{{ prefill_style|default:"General"|escapejs }}';
+// Build style from cart items if available
+var _cartItems = JSON.parse(localStorage.getItem('beysos_cart') || '[]');
+var _photoItems = _cartItems.filter(function(i) { return i.type !== 'prompt'; });
+var _prefillStyle = '{{ prefill_style|default:""|escapejs }}';
+let selectedStyle = _photoItems.length > 0
+  ? _photoItems.map(function(i) { return i.category; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ')
+  : (_prefillStyle || 'General');
 let uploadedFiles = [];
 let stripe, cardElement;
 
@@ -700,8 +708,8 @@ document.addEventListener('DOMContentLoaded', () => {
   updatePricing();
 
   // Prefill from cart if coming from gallery
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('notes')) document.getElementById('specialNotes').value = urlParams.get('notes');
+  {% comment %} const urlParams = new URLSearchParams(window.location.search); {% endcomment %}
+  {% comment %} if (urlParams.get('notes')) document.getElementById('specialNotes').value = urlParams.get('notes'); {% endcomment %}
 });
 
 // File upload
@@ -780,7 +788,22 @@ function setStep(n) {
 // 2. Confirm card payment with Stripe.js
 // 3. On success, POST order + photos to Django backend
 // ─────────────────────────────────────────────
+
+
+// Capture style from cart before payment clears it
+  var _cart = JSON.parse(localStorage.getItem('beysos_cart') || '[]');
+  var _photos = _cart.filter(function(i) { return i.type !== 'prompt'; });
+  if (_photos.length > 0) {
+    selectedStyle = _photos.map(function(i) { return i.category; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
+  }
+  if (!selectedStyle || selectedStyle === 'undefined') selectedStyle = _prefillStyle || 'General';
+
 async function handlePayment() {
+  console.log('=== PAYMENT DEBUG ===');
+  console.log('selectedStyle:', selectedStyle);
+  console.log('_prefillStyle:', typeof _prefillStyle !== 'undefined' ? _prefillStyle : 'NOT DEFINED');
+  console.log('cart:', JSON.parse(localStorage.getItem('beysos_cart') || '[]'));
+  console.log('URL style param:', new URLSearchParams(window.location.search).get('style'));
   const btn = document.getElementById('payBtn');
   clearMsg('cardErrors');
 
@@ -844,11 +867,13 @@ async function handlePayment() {
       formData.append('client_name',       document.getElementById('clientName').value.trim());
       formData.append('client_email',      document.getElementById('clientEmail').value.trim());
       {% comment %} formData.append('booking_id',        document.getElementById('clientID').value.trim()); {% endcomment %}
+      console.log('selectedStyle being sent:', selectedStyle);
       formData.append('style_chosen',      selectedStyle);
       formData.append('special_notes',     document.getElementById('specialNotes').value.trim());
       formData.append('stripe_payment_id', paymentIntent.id);
       formData.append('amount_paid',       CONFIG.cartAmount || (CONFIG.pricePerPhoto * uploadedFiles.length));
       formData.append('cart_items',        JSON.stringify(JSON.parse(localStorage.getItem('beysos_cart') || '[]')));
+      formData.append('selected_image', document.getElementById('selectedImageHidden').value);
       uploadedFiles.forEach(f => formData.append('photos', f));
 
       const saveRes  = await fetch(CONFIG.saveOrderUrl, {

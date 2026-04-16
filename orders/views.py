@@ -88,6 +88,7 @@ def order_form(request):
         'prefill_notes':          request.GET.get('notes', ''),
         'prefill_count':          request.GET.get('count', '1'),
         'cart_amount':            price_per_photo,
+        'selected_image':         request.GET.get('notes', ''),
     })
 
 
@@ -132,6 +133,7 @@ def save_order(request):
         booking_id  = request.POST.get('booking_id', '').strip()
         style       = request.POST.get('style_chosen', '').strip()
         notes       = request.POST.get('special_notes', '').strip()
+        selected_image = request.POST.get('selected_image', '').strip()
         payment_id  = request.POST.get('stripe_payment_id', '').strip()
         photo_count    = len(request.FILES.getlist('photos'))
         cart_json      = request.POST.get('cart_items', '[]')
@@ -145,6 +147,7 @@ def save_order(request):
         order = Order.objects.create(
             booking_id=booking_id, client_name=name, client_email=email,
             style_chosen=style, special_notes=notes, photo_count=photo_count,
+            selected_image=selected_image,
             amount_paid=amount, currency=settings.CURRENCY,
             stripe_payment_id=payment_id, status='paid',
         )
@@ -345,8 +348,18 @@ def _send_studio_notification(order, cart_items=None):
         if prompt_count > 0:
             type_line += f", Prompt order: {prompt_count}"
         send_mail(
-            subject=f"New Order #{order.short_id} — {order.style_chosen}",
-            message=f"New order!\n\nClient: {order.client_name}\nEmail: {order.client_email}\nStyle: {order.style_chosen}\nType: {type_line}\nPhotos client uploaded: {order.photo_count}\nAmount: ${order.amount_paid:.2f}\nStripe ID: {order.stripe_payment_id}",
+            subject=f"New Order #{order.short_id} — {order.selected_image}",
+            message=(
+                f"New order!\n\n"
+                f"Client: {order.client_name}\n"
+                f"Email: {order.client_email}\n"
+                f"Selected: {order.selected_image}\n"   # ← replaces "Style: undefined"
+                # f"Special Notes: {order.special_notes}\n"  # ← admin sees this too
+                f"Type: {type_line}\n"
+                f"Photos client uploaded: {order.photo_count}\n"
+                f"Amount: ${order.amount_paid:.2f}\n"
+                f"Stripe ID: {order.stripe_payment_id}"
+            ),
             from_email=settings.DEFAULT_FROM_EMAIL,
             recipient_list=[settings.STUDIO_EMAIL],
             fail_silently=True,

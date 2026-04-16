@@ -329,7 +329,7 @@ footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex;
   {% elif category.is_bundle %}
     {# No per-image buttons for bundles #}
   {% else %}
-    <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{% if img.image %}{{ img.image.url|escapejs }}{% elif img.video_thumbnail %}{{ img.video_thumbnail.url|escapejs }}{% elif img.video %}{{ img.video.url|escapejs }}{% endif %}')">
+    <button class="btn-book-now" onclick="bookNow('{% url 'order_form' %}', {{ img.id }}, '{% if img.image %}{{ img.image.url|escapejs }}{% elif img.video_thumbnail %}{{ img.video_thumbnail.url|escapejs }}{% elif img.video %}{{ img.video.url|escapejs }}{% endif %}', '{{ category.name|escapejs }}', '{{ img.title|default:category.name|escapejs }}', '{{ img.price }}', {{ img.price_cents }})">
       ✦ Book Now
     </button>
     <button class="btn-add-cart" id="cart-btn-{{ img.id }}" onclick="addToCart({{ img.id }}, '{% if img.image %}{{ img.image.url }}{% elif img.video_thumbnail %}{{ img.video_thumbnail.url }}{% elif img.video %}{{ img.video.url }}{% endif %}', '{{ img.title|escapejs }}', '{{ category.name|escapejs }}', {{ img.price }}, {{ img.price_cents }})">

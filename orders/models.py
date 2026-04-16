@@ -16,6 +16,7 @@ class Order(models.Model):
     client_name     = models.CharField(max_length=255)
     client_email    = models.EmailField()
     style_chosen    = models.CharField(max_length=100)
+    selected_image = models.CharField(max_length=500, blank=True, default='')
     special_notes   = models.TextField(blank=True)
     photo_count     = models.PositiveIntegerField(default=1)
     amount_paid     = models.DecimalField(max_digits=8, decimal_places=2, default=0)
