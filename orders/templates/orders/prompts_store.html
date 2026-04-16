@@ -379,6 +379,7 @@ function openPurchaseModal(promptId, title, price, priceCents) {
   const btn = document.getElementById('payPromptBtn');
   btn.disabled = false;
   btn.textContent = '🔒 Pay & Get Prompt';
+  
   // Reset Stripe card element
   if (promptCardElement) {
     promptCardElement.clear();
