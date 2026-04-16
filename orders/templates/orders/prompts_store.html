@@ -92,6 +92,15 @@
     .divider span { flex: 1; height: 1px; background: var(--border); }
     .diamond { width: 5px; height: 5px; background: var(--gold); transform: rotate(45deg); flex-shrink: 0; }
 
+
+    /* FOOTER */
+    footer { border-top: 1px solid var(--border); padding: 40px 60px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; position: relative; z-index: 1; }
+    .footer-copy { font-size: 12px; color: var(--muted); }
+    .footer-links { display: flex; gap: 28px; }
+    .footer-links a { font-size: 11px; letter-spacing: 0.1em; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+    .footer-links a:hover { color: var(--gold); }
+    @media (max-width: 600px) { footer { padding: 32px 24px; flex-direction: column; text-align: center; } .footer-links { justify-content: center; } }
+  
     /* CATEGORY TABS */
     .category-tabs { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 48px; }
     .cat-tab { padding: 8px 20px; border: 1px solid var(--border); border-radius: 2px; font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--ink); text-decoration: var(--ink); transition: all 0.3s; background: transparent; cursor: pointer; }
@@ -307,6 +316,16 @@
   </div>
 </div>
 
+<footer>
+  <div class="footer-copy">© Lifestro Global 2025. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="{% url 'home' %}">Home</a>
+    <a href="{% url 'gallery' %}">Gallery</a>
+    {% comment %} <a href="{% url 'order_form' %}">Book Now</a> {% endcomment %}
+    <a href="{% url 'home' %}#contact">Contact</a>
+  </div>
+</footer>
+
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 const navbar = document.getElementById('navbar');
@@ -379,7 +398,7 @@ function openPurchaseModal(promptId, title, price, priceCents) {
   const btn = document.getElementById('payPromptBtn');
   btn.disabled = false;
   btn.textContent = '🔒 Pay & Get Prompt';
-  
+
   // Reset Stripe card element
   if (promptCardElement) {
     promptCardElement.clear();
