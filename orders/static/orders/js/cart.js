@@ -30,7 +30,7 @@ function cartRemove(id) {
   if (btn)  { btn.textContent = '+ Add to Cart'; btn.classList.remove('added'); }
   if (card) { card.classList.remove('in-cart'); }
 
-  // Reset prompt button (id is like "prompt-123", so extract the number)
+  // Reset prompt button 
   var promptBtn = document.getElementById('prompt-cart-btn-' + String(id).replace('prompt-', ''));
   if (promptBtn) {
     promptBtn.textContent = '+ Cart';
@@ -38,7 +38,7 @@ function cartRemove(id) {
     promptBtn.style.color = 'var(--gold)';
   }
 
-  // Reset bundle button (id is like "bundle-123")
+  // Reset bundle button 
   var bundleBtn = document.getElementById('bundle-cart-btn-' + String(id).replace('bundle-', ''));
   if (bundleBtn) { bundleBtn.textContent = '+ Add Bundle to Cart'; bundleBtn.classList.remove('added'); }
 
